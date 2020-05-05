@@ -1,0 +1,11 @@
+appdirs==1.4.3
+astor==0.8.1
+attrs==19.3.0
+black==19.10b0
+click==7.1.2
+pathspec==0.8.0
+regex==2020.4.4
+ruamel.yaml==0.16.10
+ruamel.yaml.clib==0.2.0
+toml==0.10.0
+typed-ast==1.4.1
