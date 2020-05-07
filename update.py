@@ -16,9 +16,7 @@ import ruamel.yaml
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
-
 SUBDIRS = ("modules", "action")
-
 SPECIALS = {"ospfv2": "OSPFv2", "interfaces": "Interfaces", "static": "Static"}
 
 
@@ -177,16 +175,18 @@ def update_short_description(retrn, documentation, module_name):
         logging.warning("Failed to find RETURN assignment")
         return
     ret_section = ruamel.yaml.load(retrn[0].value.value, ruamel.yaml.RoundTripLoader)
+    if len(documentation) != 1:
+        logging.warning("Failed to find DOCUMENTATION assignment")
+        return
+    doc_section = ruamel.yaml.load(
+        documentation[0].value.value, ruamel.yaml.RoundTripLoader
+    )
+    short_description = doc_section['short_description']
+    
     rm_rets = ["after", "before", "commands"]
     match = [x for x in rm_rets if x in list(ret_section.keys())]
     if len(match) == len(rm_rets):
         logging.info("Found a resource module")
-        if len(documentation) != 1:
-            logging.warning("Failed to find DOCUMENTATION assignment")
-            return
-        doc_section = ruamel.yaml.load(
-            documentation[0].value.value, ruamel.yaml.RoundTripLoader
-        )
         parts = module_name.split("_")
         # things like 'interfaces'
         resource = parts[1].lower()
@@ -200,11 +200,15 @@ def update_short_description(retrn, documentation, module_name):
             resource = "".join(chars)
         if len(parts) > 2 and parts[2] != "global":
             resource += " {p1}".format(p1=parts[2])
-        new_short = "{resource} resource module".format(resource=resource)
-        logging.info(
-            "Setting short desciption to '{new_short}'".format(new_short=new_short)
-        )
-        doc_section["short_description"] = new_short
+        short_description = "{resource} resource module".format(resource=resource)
+    # Check for deprecated modules
+    if 'deprecated' in doc_section:
+        logging.info("Found to be deprecated")
+        short_description = "(deprecated) {short_description}".format(short_description=short_description)
+    # Change short if necessary
+    if short_description != doc_section['short_description']:
+        logging.info("Setting short desciption to '%s'", short_description)
+        doc_section["short_description"] = short_description
         repl = ruamel.yaml.dump(doc_section, None, ruamel.yaml.RoundTripDumper)
         documentation[0].value.value = repl
 
