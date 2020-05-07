@@ -202,7 +202,7 @@ def update_short_description(retrn, documentation, module_name):
             resource += " {p1}".format(p1=parts[2])
         short_description = "{resource} resource module".format(resource=resource)
     # Check for deprecated modules
-    if 'deprecated' in doc_section:
+    if 'deprecated' in doc_section and not short_description.startswith('(deprecated)'):
         logging.info("Found to be deprecated")
         short_description = "(deprecated) {short_description}".format(short_description=short_description)
     # Change short if necessary
