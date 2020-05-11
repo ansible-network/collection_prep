@@ -1,7 +1,6 @@
 """
 Get ready for 1.0.0
 """
-import ast
 import logging
 import platform
 import os
@@ -10,7 +9,7 @@ import sys
 import subprocess
 
 from argparse import ArgumentParser
-import astor
+from redbaron import RedBaron
 import ruamel.yaml
 
 
@@ -19,28 +18,6 @@ logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 SUBDIRS = ("modules", "action")
 SPECIALS = {"ospfv2": "OSPFv2", "interfaces": "Interfaces", "static": "Static"}
 
-
-LICENSE = """
-#!/usr/bin/python
-#
-# This file is part of Ansible
-#
-# Ansible is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Ansible is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
-#
-"""
-
-
 def load_py_as_ast(path):
     """
     Load a file as an ast object
@@ -48,8 +25,10 @@ def load_py_as_ast(path):
     :param path: The full path to the file
     :return: The ast object
     """
-    ast_file = astor.code_to_ast.parse_file(path)
-    return ast_file
+    with open(path) as file:
+        data = file.read()
+        red = RedBaron(data)
+    return red
 
 
 def find_assigment_in_ast(name, ast_file):
@@ -60,9 +39,8 @@ def find_assigment_in_ast(name, ast_file):
     :param ast_file: The ast object
     :return: A list of ast object matching
     """
-    return [
-        b for b in ast_file.body if hasattr(b, "targets") and b.targets[0].id == name
-    ]
+    res = ast_file.find("assignment", target=lambda x: x.dumps() == name)
+    return res
 
 
 def retrieve_module_name(bodypart):
@@ -72,12 +50,13 @@ def retrieve_module_name(bodypart):
     :param bodypart: The doctstring extracted from the ast body
     :return: The module name
     """
-    if len(bodypart) != 1:
+    if not bodypart:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return
     documentation = ruamel.yaml.load(
-        bodypart[0].value.value, ruamel.yaml.RoundTripLoader
+        bodypart.value.to_python(), ruamel.yaml.RoundTripLoader
     )
+
     name = documentation["module"]
     return name
 
@@ -88,14 +67,12 @@ def update_metdata(bodypart):
 
     :param bodypart: The ANSIBLE_METADATA section
     """
-    if len(bodypart) != 1:
+    if not bodypart:
         logging.warning("Failed to find ANSIBLE_METADATA assignment")
         return None
-    meta = ast.Dict()
-    meta.keys = [ast.Constant(s) for s in ["metadata_version", "supported_by"]]
-    meta.values = [ast.Constant(s) for s in ["1.1", "Ansible"]]
-    bodypart[0].value = meta
-
+    meta = {"metadata_version": "1.1", "supported_by": "Ansible"}
+    bodypart.value.replace(str(meta))
+  
 
 def update_documentation(bodypart):
     """
@@ -103,11 +80,11 @@ def update_documentation(bodypart):
 
     :param bodypart: The DOCUMENTATION section of the module
     """
-    if len(bodypart) != 1:
+    if not bodypart:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return
     documentation = ruamel.yaml.load(
-        bodypart[0].value.value, ruamel.yaml.RoundTripLoader
+        bodypart.value.to_python(), ruamel.yaml.RoundTripLoader
     )
     # remove version added
     documentation.pop("version_added", None)
@@ -122,8 +99,7 @@ def update_documentation(bodypart):
     example_lines = repl.splitlines()
     regex = re.compile(r"^\s+version_added\:\s.*$")
     example_lines = [l for l in example_lines if not re.match(regex, l)]
-    bodypart[0].value.value = "\n".join(example_lines)
-
+    bodypart.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
 
 def update_examples(bodypart, module_name, collection):
     """
@@ -134,13 +110,13 @@ def update_examples(bodypart, module_name, collection):
     :param collection: The name of the collection
     """
 
-    if len(bodypart) != 1:
+    if not bodypart:
         logging.warning("Failed to find EXAMPLES assignment")
         return
     full_module_name = "{collection}.{module_name}".format(
         collection=collection, module_name=module_name
     )
-    example = ruamel.yaml.load(bodypart[0].value.value, ruamel.yaml.RoundTripLoader)
+    example = ruamel.yaml.load(bodypart.value.to_python(), ruamel.yaml.RoundTripLoader)
     # check each task and update to fqcn
     for idx, task in enumerate(example):
         example[idx] = ruamel.yaml.comments.CommentedMap(
@@ -161,7 +137,8 @@ def update_examples(bodypart, module_name, collection):
             and full_module_name not in line
         ):
             example_lines[idx] = line.replace(module_name, full_module_name)
-    bodypart[0].value.value = "\n".join(example_lines)
+    bodypart.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
+
 
 
 def update_short_description(retrn, documentation, module_name):
@@ -171,15 +148,15 @@ def update_short_description(retrn, documentation, module_name):
     :param bodypart: The DOCUMENTATION section of the module
     :param module_name: The module name
     """
-    if len(retrn) != 1:
+    if not retrn:
         logging.warning("Failed to find RETURN assignment")
         return
-    ret_section = ruamel.yaml.load(retrn[0].value.value, ruamel.yaml.RoundTripLoader)
-    if len(documentation) != 1:
+    ret_section = ruamel.yaml.load(retrn.value.to_python(), ruamel.yaml.RoundTripLoader)
+    if not documentation:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return
     doc_section = ruamel.yaml.load(
-        documentation[0].value.value, ruamel.yaml.RoundTripLoader
+        documentation.value.to_python(), ruamel.yaml.RoundTripLoader
     )
     short_description = doc_section['short_description']
     
@@ -210,7 +187,8 @@ def update_short_description(retrn, documentation, module_name):
         logging.info("Setting short desciption to '%s'", short_description)
         doc_section["short_description"] = short_description
         repl = ruamel.yaml.dump(doc_section, None, ruamel.yaml.RoundTripDumper)
-        documentation[0].value.value = repl
+        documentation.value.replace('"""\n' + repl + '\n"""')
+
 
 
 def black(filename):
@@ -281,7 +259,7 @@ def process(collection, path):
                 logging.info("Updated examples in %s", filename)
 
                 # Write out the file and black
-                filec = LICENSE + astor.to_source(ast_obj)
+                filec = ast_obj.dumps()
                 with open(filename, "w") as fileh:
                     fileh.write(filec)
                     logging.info("Wrote %s", filename)
