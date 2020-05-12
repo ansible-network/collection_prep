@@ -42,6 +42,16 @@ def find_assigment_in_ast(name, ast_file):
     res = ast_file.find("assignment", target=lambda x: x.dumps() == name)
     return res
 
+def remove_assigment_in_ast(name, ast_file):
+    """
+    REmoves an assignment in an ast object
+
+    :param name: The name of the assignement to remove
+    :param ast_file: The ast object
+    """
+    res = ast_file.find("assignment", target=lambda x: x.dumps() == name)
+    ast_file.remove(res)
+
 
 def retrieve_module_name(bodypart):
     """
@@ -60,19 +70,6 @@ def retrieve_module_name(bodypart):
     name = documentation["module"]
     return name
 
-
-def update_metdata(bodypart):
-    """
-    Update the metadata of the module
-
-    :param bodypart: The ANSIBLE_METADATA section
-    """
-    if not bodypart:
-        logging.warning("Failed to find ANSIBLE_METADATA assignment")
-        return None
-    meta = {"metadata_version": "1.1", "supported_by": "Ansible"}
-    bodypart.value.replace(str(meta))
-  
 
 def update_documentation(bodypart):
     """
@@ -225,13 +222,9 @@ def process(collection, path):
                     logging.warning("Skipped %s: No module name found", filename)
                     continue
 
-                # Update the metadata
-                update_metdata(
-                    bodypart=find_assigment_in_ast(
-                        ast_file=ast_obj, name="ANSIBLE_METADATA"
-                    )
-                )
-                logging.info("Updated metadata in %s", filename)
+                # Remove the metadata
+                remove_assigment_in_ast(ast_file=ast_obj, name="ANSIBLE_METADATA")
+                logging.info("Removed metadata in %s", filename)
 
                 # Update the documentation
                 update_documentation(
