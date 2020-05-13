@@ -42,6 +42,7 @@ def find_assigment_in_ast(name, ast_file):
     res = ast_file.find("assignment", target=lambda x: x.dumps() == name)
     return res
 
+
 def remove_assigment_in_ast(name, ast_file):
     """
     REmoves an assignment in an ast object
@@ -50,7 +51,8 @@ def remove_assigment_in_ast(name, ast_file):
     :param ast_file: The ast object
     """
     res = ast_file.find("assignment", target=lambda x: x.dumps() == name)
-    ast_file.remove(res)
+    if res:
+        ast_file.remove(res)
 
 
 def retrieve_module_name(bodypart):
