@@ -1,5 +1,3 @@
-:source: @{ source }@
-
 {# avoids rST "isn't included in any toctree" errors for module docs #}
 {% if plugin_type == 'module' %}
 :orphan:
@@ -10,17 +8,18 @@
 .. _@{ alias }@_@{ plugin_type }@:
 {% endfor %}
 
+
+*****
+@{ module }@
+*****
+
 {% if short_description %}
-{%   set title = module + ' -- ' + short_description | rst_ify %}
-{% else %}
-{%   set title = module %}
+**@{ short_description | rst_ify}@**
 {% endif %}
 
-@{ title }@
-@{ '+' * title|length }@
 
 {% if version_added is defined and version_added != '' -%}
-.. versionadded:: @{ version_added | default('') }@
+Version added: @{ version_added | default('') }@
 {% endif %}
 
 .. contents::
@@ -417,35 +416,6 @@ Status
 
 - This @{ plugin_type }@ will be removed in version @{ deprecated['removed_in'] | default('') | string | rst_ify }@. *[deprecated]*
 - For more information see `DEPRECATED`_.
-
-{% else %}
-
-{%   set support = { 'core': 'the Ansible Core Team', 'network': 'the Ansible Network Team', 'certified': 'an Ansible Partner', 'community': 'the Ansible Community', 'curated': 'a Third Party'} %}
-{%   set module_states = { 'preview': 'not guaranteed to have a backwards compatible interface', 'stableinterface': 'guaranteed to have backward compatible interface changes going forward'} %}
-
-{%   if metadata %}
-{%     if metadata.status %}
-
-{%       for cur_state in metadata.status %}
-- This @{ plugin_type }@ is @{ module_states[cur_state] }@. *[@{ cur_state }@]*
-{%       endfor %}
-
-{%     endif %}
-
-{%     if metadata.supported_by %}
-{%       set supported_by = support[metadata.supported_by] %}
-- This @{ plugin_type }@ is :ref:`maintained by @{ supported_by }@ <modules_support>`. *[@{ metadata.supported_by }@]*
-
-{%       if metadata.supported_by in ('core', 'network') %}
-Red Hat Support
-~~~~~~~~~~~~~~~
-
-More information about Red Hat's support of this @{ plugin_type }@ is available from this `Red Hat Knowledge Base article <https://access.redhat.com/articles/3166901>`_.
-{%       endif %}
-
-{%     endif %}
-
-{%   endif %}
 
 {% endif %}
 

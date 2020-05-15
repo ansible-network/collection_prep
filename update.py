@@ -160,23 +160,24 @@ def update_short_description(retrn, documentation, module_name):
     short_description = doc_section['short_description']
     
     rm_rets = ["after", "before", "commands"]
-    match = [x for x in rm_rets if x in list(ret_section.keys())]
-    if len(match) == len(rm_rets):
-        logging.info("Found a resource module")
-        parts = module_name.split("_")
-        # things like 'interfaces'
-        resource = parts[1].lower()
-        if resource in SPECIALS:
-            resource = SPECIALS[resource]
-        else:
-            resource = resource.upper()
-        if resource.lower()[-1].endswith("s"):
-            chars = list(resource)
-            chars[-1] = chars[-1].lower()
-            resource = "".join(chars)
-        if len(parts) > 2 and parts[2] != "global":
-            resource += " {p1}".format(p1=parts[2])
-        short_description = "{resource} resource module".format(resource=resource)
+    if ret_section:
+        match = [x for x in rm_rets if x in list(ret_section.keys())]
+        if len(match) == len(rm_rets):
+            logging.info("Found a resource module")
+            parts = module_name.split("_")
+            # things like 'interfaces'
+            resource = parts[1].lower()
+            if resource in SPECIALS:
+                resource = SPECIALS[resource]
+            else:
+                resource = resource.upper()
+            if resource.lower()[-1].endswith("s"):
+                chars = list(resource)
+                chars[-1] = chars[-1].lower()
+                resource = "".join(chars)
+            if len(parts) > 2 and parts[2] != "global":
+                resource += " {p1}".format(p1=parts[2])
+            short_description = "{resource} resource module".format(resource=resource)
     # Check for deprecated modules
     if 'deprecated' in doc_section and not short_description.startswith('(deprecated)'):
         logging.info("Found to be deprecated")
