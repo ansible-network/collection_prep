@@ -1,5 +1,7 @@
 # 1.0.0 prep engine
 
+
+## CONTENT UPDATER
 ```
 python update.py -c arista.eos -p ./
 ```
@@ -24,4 +26,18 @@ INFO      Running black against ./arista.eos/plugins/modules/eos_static_routes.p
 INFO      -------------------Processing ./arista.eos/plugins/action/__init__.py
 WARNING   Failed to find DOCUMENTATION assignment
 WARNING   Skipped ./arista.eos/plugins/action/__init__.py: No module name found
+```
+
+## DOC GENERATOR
+
+This is intended to operate against the repository clone.
+
+Ensure the collection README.md has the following in it:
+```
+
+<!--start collection content-->
+<!--end collection content-->
+
+```
+python add_docs.py -p ./arista.eos
 ```
