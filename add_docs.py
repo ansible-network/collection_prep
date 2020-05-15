@@ -196,8 +196,9 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
     """
     template = jinja_environment()
     docs_path = Path(path, "docs")
-    logging.info("Purging content from directory %s", docs_path)
-    shutil.rmtree(docs_path)
+    if docs_path.is_dir():
+        logging.info("Purging content from directory %s", docs_path)
+        shutil.rmtree(docs_path)
     logging.info("Making docs directory %s", docs_path)
     Path(docs_path).mkdir(parents=True, exist_ok=True)
 
