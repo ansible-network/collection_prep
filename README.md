@@ -40,7 +40,10 @@ Ensure the collection README.md has the following in it:
 ```
 
 ```console
-(venv) ➜  collection_update git:(master) ✗ python add_docs.py -p ./ansible.netcommon               
+python add_docs.py -p ./ansible.netcommon     
+```
+
+```console
 INFO      Setting collection name to ansible.netcommon
 INFO      Setting github repository url to https://github.com/ansible-collections/ansible.netcommon
 INFO      Linking collection to user collection directory
