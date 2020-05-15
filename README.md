@@ -37,6 +37,7 @@ Ensure the collection README.md has the following in it:
 
 <!--start collection content-->
 <!--end collection content-->
+```
 
 ```console
 (venv) ➜  collection_update git:(master) ✗ python add_docs.py -p ./ansible.netcommon               
