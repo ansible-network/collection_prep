@@ -32,6 +32,8 @@ WARNING   Skipped ./arista.eos/plugins/action/__init__.py: No module name found
 
 This is intended to operate against the repository clone.
 
+This will generate an RST file for each plugin in the collection docs folder and add a table of links for all plugin types in the REAMDE.md
+
 Ensure the collection README.md has the following in it:
 ```
 
