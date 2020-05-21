@@ -21,7 +21,7 @@ from update import load_py_as_ast, find_assigment_in_ast
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
 COLLECTION_MIN_ANSIBLE_VERSION = ">=2.9"
-DEPRECATION_CYCLE_IN_DAYS = 365
+DEPRECATION_CYCLE_IN_DAYS = 365 * 2
 
 
 def get_warning_msg(plugin_name):
@@ -60,8 +60,12 @@ def process_runtime_plugin_routing(collection, path):
             documentation.value.to_python(), ruamel.yaml.RoundTripLoader
         )
 
-        module_prefix = module_name.split("_")[0]
-        short_name = module_name.split("_", 1)[1]
+        try:
+            module_prefix = module_name.split("_")[0]
+        except IndexError:
+            module_prefix = module_name
+
+        short_name = module_name.split("_", 1)[-1]
 
         # handle action plugin redirection
         if (
@@ -84,6 +88,8 @@ def process_runtime_plugin_routing(collection, path):
         # handle module (incl short name) deprecation
         if "deprecated" in doc_section:
             logging.info("Found to be deprecated")
+            if not plugin_routing.get("modules"):
+                plugin_routing["modules"] = {}
             plugin_routing["modules"].update(
                 {
                     module_name: {
@@ -95,13 +101,19 @@ def process_runtime_plugin_routing(collection, path):
                     }
                 }
             )
-            plugin_routing["modules"][short_name].update(
-                {
-                    "deprecation": {
-                        "warning_text": get_warning_msg(f"{collection}.{short_name}")
+            if module_prefix == collection_name:
+                if not plugin_routing["modules"].get(short_name):
+                    plugin_routing["modules"][short_name] = {}
+
+                plugin_routing["modules"][short_name].update(
+                    {
+                        "deprecation": {
+                            "warning_text": get_warning_msg(
+                                f"{collection}.{short_name}"
+                            )
+                        }
                     }
-                }
-            )
+                )
 
     return plugin_routing
 

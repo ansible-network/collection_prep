@@ -101,3 +101,82 @@ INFO      Processing 'modules' for README
 INFO      README.md updated
 (venv) ➜  collection_update git:(master) ✗ 
 ```
+
+## meta/runtime.yml GENERATOR
+
+This is intended to operate against the repository clone.
+```console
+python runtime.py -c arista.eos -p ./
+```
+```console
+INFO      -------------------Processing runtime.yml for module eos_acl_interfaces
+INFO      -------------------Processing runtime.yml for module eos_acls
+INFO      -------------------Processing runtime.yml for module eos_banner
+INFO      -------------------Processing runtime.yml for module eos_bgp
+INFO      -------------------Processing runtime.yml for module eos_command
+INFO      -------------------Processing runtime.yml for module eos_config
+INFO      -------------------Processing runtime.yml for module eos_eapi
+INFO      -------------------Processing runtime.yml for module eos_facts
+INFO      -------------------Processing runtime.yml for module eos_interface
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_interfaces
+INFO      -------------------Processing runtime.yml for module eos_l2_interface
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_l2_interfaces
+INFO      -------------------Processing runtime.yml for module eos_l3_interface
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_l3_interfaces
+INFO      -------------------Processing runtime.yml for module eos_lacp
+INFO      -------------------Processing runtime.yml for module eos_lacp_interfaces
+INFO      -------------------Processing runtime.yml for module eos_lag_interfaces
+INFO      -------------------Processing runtime.yml for module eos_linkagg
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_lldp
+INFO      -------------------Processing runtime.yml for module eos_lldp_global
+INFO      -------------------Processing runtime.yml for module eos_lldp_interfaces
+INFO      -------------------Processing runtime.yml for module eos_logging
+INFO      -------------------Processing runtime.yml for module eos_static_route
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_static_routes
+INFO      -------------------Processing runtime.yml for module eos_system
+INFO      -------------------Processing runtime.yml for module eos_user
+INFO      -------------------Processing runtime.yml for module eos_vlan
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_vlans
+INFO      -------------------Processing runtime.yml for module eos_vrf
+INFO      -------------------Processing runtime.yml for module eos_acl_interfaces
+INFO      -------------------Processing runtime.yml for module eos_acls
+INFO      -------------------Processing runtime.yml for module eos_banner
+INFO      -------------------Processing runtime.yml for module eos_bgp
+INFO      -------------------Processing runtime.yml for module eos_command
+INFO      -------------------Processing runtime.yml for module eos_config
+INFO      -------------------Processing runtime.yml for module eos_eapi
+INFO      -------------------Processing runtime.yml for module eos_facts
+INFO      -------------------Processing runtime.yml for module eos_interface
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_interfaces
+INFO      -------------------Processing runtime.yml for module eos_l2_interface
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_l2_interfaces
+INFO      -------------------Processing runtime.yml for module eos_l3_interface
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_l3_interfaces
+INFO      -------------------Processing runtime.yml for module eos_lacp
+INFO      -------------------Processing runtime.yml for module eos_lacp_interfaces
+INFO      -------------------Processing runtime.yml for module eos_lag_interfaces
+INFO      -------------------Processing runtime.yml for module eos_linkagg
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_lldp
+INFO      -------------------Processing runtime.yml for module eos_lldp_global
+INFO      -------------------Processing runtime.yml for module eos_lldp_interfaces
+INFO      -------------------Processing runtime.yml for module eos_logging
+INFO      -------------------Processing runtime.yml for module eos_static_route
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_static_routes
+INFO      -------------------Processing runtime.yml for module eos_system
+INFO      -------------------Processing runtime.yml for module eos_user
+INFO      -------------------Processing runtime.yml for module eos_vlan
+INFO      Found to be deprecated
+INFO      -------------------Processing runtime.yml for module eos_vlans
+INFO      -------------------Processing runtime.yml for module eos_vrf
+```
