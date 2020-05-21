@@ -5,14 +5,10 @@ import datetime
 import logging
 import platform
 import os
-import re
 import sys
-import subprocess
 import glob
 
 from argparse import ArgumentParser
-from collections import OrderedDict
-from redbaron import RedBaron
 import ruamel.yaml
 from update import load_py_as_ast, find_assigment_in_ast
 
@@ -20,13 +16,20 @@ from update import load_py_as_ast, find_assigment_in_ast
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
 COLLECTION_MIN_ANSIBLE_VERSION = ">=2.9"
-DEPRECATION_CYCLE_IN_DAYS = 365
+DEPRECATION_CYCLE_IN_YEAR = 2
+REMOVAL_FREQUENCY_IN_MONTHS = 3
+REMOVAL_DAY_OF_MONTH = "01"
 
 
 def get_warning_msg(plugin_name):
-    depcrecation_date = datetime.date.today() + datetime.timedelta(
-        days=DEPRECATION_CYCLE_IN_DAYS
-    )
+    today = datetime.date.today()
+    deprecation_year = today.year + DEPRECATION_CYCLE_IN_YEAR
+    if today.month % REMOVAL_FREQUENCY_IN_MONTHS:
+        depcrecation_month = (today.month + REMOVAL_FREQUENCY_IN_MONTHS) - (today.month % REMOVAL_FREQUENCY_IN_MONTHS)
+    else:
+        depcrecation_month = today.month
+
+    depcrecation_date = f"{deprecation_year}-{depcrecation_month}-{REMOVAL_DAY_OF_MONTH}"
     depcrecation_msg = f"{plugin_name} has been deprecated and will be removed in a release after {depcrecation_date}. See the plugin documentation for more details"
     return depcrecation_msg
 
@@ -43,6 +46,7 @@ def process_runtime_plugin_routing(collection, path):
         logging.error(f"failed to get collection name from {collection}")
 
     for fullpath in sorted(glob.glob(f"{modules_path}/*.py")):
+        is_depcrecated = False
         filename = fullpath.split("/")[-1]
         if not filename.endswith(".py") or filename.endswith("__init__.py"):
             continue
@@ -59,8 +63,15 @@ def process_runtime_plugin_routing(collection, path):
             documentation.value.to_python(), ruamel.yaml.RoundTripLoader
         )
 
-        module_prefix = module_name.split("_")[0]
-        short_name = module_name.split("_", 1)[1]
+        if "deprecated" in doc_section:
+            is_depcrecated = True
+
+        try:
+            module_prefix = module_name.split("_")[0]
+        except IndexError:
+            module_prefix = module_name
+
+        short_name = module_name.split("_", 1)[-1]
 
         # handle action plugin redirection
         if (
@@ -73,16 +84,21 @@ def process_runtime_plugin_routing(collection, path):
             plugin_routing["action"].update({module_name: {"redirect": fq_action_name}})
             plugin_routing["action"].update({short_name: {"redirect": fq_action_name}})
 
-        # handle module short name redirection
-        if module_prefix == collection_name:
+        # handle module short name redirection only in case if module is not deprecated.
+        # Add short redirection if module prefix and collection name is same
+        # for example arista.eos.eos_acls will support redirection for arista.eos.acls
+        # as the prefix of module name (eos) is same as the collection name
+        if module_prefix == collection_name and not is_depcrecated:
             fq_module_name = f"{collection}.{module_name}"
             if not plugin_routing.get("modules"):
                 plugin_routing["modules"] = {}
             plugin_routing["modules"].update({short_name: {"redirect": fq_module_name}})
 
-        # handle module (incl short name) deprecation
+        # handle module deprecation notice
         if "deprecated" in doc_section:
             logging.info("Found to be deprecated")
+            if not plugin_routing.get("modules"):
+                plugin_routing["modules"] = {}
             plugin_routing["modules"].update(
                 {
                     module_name: {
@@ -91,13 +107,6 @@ def process_runtime_plugin_routing(collection, path):
                                 f"{collection}.{module_name}"
                             )
                         }
-                    }
-                }
-            )
-            plugin_routing["modules"][short_name].update(
-                {
-                    "deprecation": {
-                        "warning_text": get_warning_msg(f"{collection}.{short_name}")
                     }
                 }
             )
@@ -110,10 +119,10 @@ def process(collection, path):
     rt_obj["requires_ansible"] = COLLECTION_MIN_ANSIBLE_VERSION
     plugin_routing = process_runtime_plugin_routing(collection, path)
     if plugin_routing:
-        rt_obj["plugin_routing"] = process_runtime_plugin_routing(collection, path)
+        rt_obj["plugin_routing"] = plugin_routing
 
+    # create meta/runtime.yml file
     meta_path = os.path.join(os.path.join(path, collection), "meta")
-
     if not os.path.exists(meta_path):
         os.makedirs(meta_path)
 
