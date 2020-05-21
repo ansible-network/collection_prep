@@ -9,7 +9,6 @@ import re
 import sys
 import subprocess
 import glob
-import yaml
 
 from argparse import ArgumentParser
 from collections import OrderedDict
@@ -120,8 +119,11 @@ def process(collection, path):
 
     runtime_path = os.path.join(meta_path, "runtime.yml")
 
+    yaml = ruamel.yaml.YAML()
+    yaml.explicit_start = True
+
     with open(runtime_path, "w") as fp:
-        fp.write(yaml.dump(rt_obj))
+        yaml.dump(rt_obj, fp)
 
 
 def main():
