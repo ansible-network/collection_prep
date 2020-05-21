@@ -1,5 +1,5 @@
 ansible==2.9.9
-ansible-base==2.10.0.dev0
+ansible-base>=0.0.1a2
 appdirs==1.4.4
 astroid==2.4.1
 attrs==19.3.0
