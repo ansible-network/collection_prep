@@ -9,6 +9,7 @@ import sys
 import glob
 
 from argparse import ArgumentParser
+
 import ruamel.yaml
 from update import load_py_as_ast, find_assigment_in_ast
 
@@ -25,11 +26,15 @@ def get_warning_msg(plugin_name):
     today = datetime.date.today()
     deprecation_year = today.year + DEPRECATION_CYCLE_IN_YEAR
     if today.month % REMOVAL_FREQUENCY_IN_MONTHS:
-        depcrecation_month = (today.month + REMOVAL_FREQUENCY_IN_MONTHS) - (today.month % REMOVAL_FREQUENCY_IN_MONTHS)
+        depcrecation_month = (today.month + REMOVAL_FREQUENCY_IN_MONTHS) - (
+            today.month % REMOVAL_FREQUENCY_IN_MONTHS
+        )
     else:
         depcrecation_month = today.month
 
-    depcrecation_date = f"{deprecation_year}-{depcrecation_month}-{REMOVAL_DAY_OF_MONTH}"
+    depcrecation_date = (
+        f"{deprecation_year}-{depcrecation_month}-{REMOVAL_DAY_OF_MONTH}"
+    )
     depcrecation_msg = f"{plugin_name} has been deprecated and will be removed in a release after {depcrecation_date}. See the plugin documentation for more details"
     return depcrecation_msg
 
@@ -46,7 +51,7 @@ def process_runtime_plugin_routing(collection, path):
         logging.error(f"failed to get collection name from {collection}")
 
     for fullpath in sorted(glob.glob(f"{modules_path}/*.py")):
-        is_depcrecated = False
+
         filename = fullpath.split("/")[-1]
         if not filename.endswith(".py") or filename.endswith("__init__.py"):
             continue
@@ -62,9 +67,6 @@ def process_runtime_plugin_routing(collection, path):
         doc_section = ruamel.yaml.load(
             documentation.value.to_python(), ruamel.yaml.RoundTripLoader
         )
-
-        if "deprecated" in doc_section:
-            is_depcrecated = True
 
         try:
             module_prefix = module_name.split("_")[0]
@@ -84,11 +86,11 @@ def process_runtime_plugin_routing(collection, path):
             plugin_routing["action"].update({module_name: {"redirect": fq_action_name}})
             plugin_routing["action"].update({short_name: {"redirect": fq_action_name}})
 
-        # handle module short name redirection only in case if module is not deprecated.
+        # handle module short name redirection.
         # Add short redirection if module prefix and collection name is same
         # for example arista.eos.eos_acls will support redirection for arista.eos.acls
         # as the prefix of module name (eos) is same as the collection name
-        if module_prefix == collection_name and not is_depcrecated:
+        if module_prefix == collection_name:
             fq_module_name = f"{collection}.{module_name}"
             if not plugin_routing.get("modules"):
                 plugin_routing["modules"] = {}
@@ -110,6 +112,19 @@ def process_runtime_plugin_routing(collection, path):
                     }
                 }
             )
+            if module_prefix == collection_name:
+                if not plugin_routing["modules"].get(short_name):
+                    plugin_routing["modules"][short_name] = {}
+
+                plugin_routing["modules"][short_name].update(
+                    {
+                        "deprecation": {
+                            "warning_text": get_warning_msg(
+                                f"{collection}.{short_name}"
+                            )
+                        }
+                    }
+                )
 
     return plugin_routing
 
