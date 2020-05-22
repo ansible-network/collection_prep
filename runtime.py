@@ -116,13 +116,17 @@ def process_runtime_plugin_routing(collection, path):
 
 def process(collection, path):
     rt_obj = {}
+    collection_path = os.path.join(path, collection)
+    if not os.path.exists(collection_path):
+        logging.error(f"{collection_path} does not exit")
+
     rt_obj["requires_ansible"] = COLLECTION_MIN_ANSIBLE_VERSION
     plugin_routing = process_runtime_plugin_routing(collection, path)
     if plugin_routing:
         rt_obj["plugin_routing"] = plugin_routing
 
     # create meta/runtime.yml file
-    meta_path = os.path.join(os.path.join(path, collection), "meta")
+    meta_path = os.path.join(collection_path, "meta")
     if not os.path.exists(meta_path):
         os.makedirs(meta_path)
 
