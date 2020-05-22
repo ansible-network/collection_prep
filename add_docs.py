@@ -8,6 +8,7 @@ import sys
 from argparse import ArgumentParser
 from functools import partial
 from pathlib import Path
+import q
 
 
 import yaml
@@ -50,7 +51,9 @@ def convert_descriptions(data):
     :type data: dict
     """
     if data:
+        q(data.values())
         for definition in data.values():
+            q(definition)
             if "description" in definition:
                 definition["description"] = ensure_list(definition["description"])
             if "suboptions" in definition:
@@ -185,6 +188,7 @@ def handle_filters(collection, fullpath):
     return plugins
 
 
+@q
 def process(collection, path):  # pylint: disable-msg=too-many-locals
     """
     Process the files in each subdirectory
@@ -225,8 +229,10 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                             fullpath, fragment_loader
                         )
                         if doc:
+                            q(fullpath)
                             if returndocs:
                                 doc["returndocs"] = yaml.safe_load(returndocs)
+                                q(doc["returndocs"])
                                 convert_descriptions(doc["returndocs"])
 
                             doc["metadata"] = (metadata,)
@@ -239,8 +245,12 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                                 collection=collection, plugin_name=doc[doc_key]
                             )
                             doc["author"] = ensure_list(doc["author"])
+                            q(doc["description"])
                             doc["description"] = ensure_list(doc["description"])
-                            convert_descriptions(doc["options"])
+                            try:
+                                convert_descriptions(doc["options"])
+                            except KeyError:
+                                pass  ## This module takes no options
 
                             module_rst_path = Path(path, "docs", doc["module"] + ".rst")
 

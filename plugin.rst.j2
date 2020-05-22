@@ -9,9 +9,9 @@
 {% endfor %}
 
 
-************************************************
+@{ '*' * module|length }@
 @{ module }@
-************************************************
+@{ '*' * module|length }@
 
 {% if short_description %}
 **@{ short_description | rst_ify}@**
