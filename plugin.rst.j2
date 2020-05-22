@@ -9,9 +9,9 @@
 {% endfor %}
 
 
-*****
+************************************************
 @{ module }@
-*****
+************************************************
 
 {% if short_description %}
 **@{ short_description | rst_ify}@**
@@ -338,7 +338,7 @@ Facts returned by this module are added/updated in the ``hostvars`` host facts a
 
 Return Values
 -------------
-Common return values are documented :ref:`here <common_return_values>`, the following are the fields unique to this @{ plugin_type }@:
+Common return values are documented `here <https://docs.ansible.com/ansible/latest/reference_appendices/common_return_values.html#common-return-values>`_, the following are the fields unique to this @{ plugin_type }@:
 
 .. raw:: html
 
@@ -426,14 +426,6 @@ Authors
 {%   for author_name in author %}
 - @{ author_name }@
 {%   endfor %}
-
-{% endif %}
-
-.. hint::
-{%   if plugin_type == 'module' %}
-    If you notice any issues in this documentation, you can `edit this document <https://github.com/ansible/ansible/edit/devel/lib/ansible/modules/@{ source }@?description=%23%23%23%23%23%20SUMMARY%0A%3C!---%20Your%20description%20here%20--%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr>`_ to improve it.
-{% else %}
-    If you notice any issues in this documentation, you can `edit this document <https://github.com/ansible/ansible/edit/devel/lib/ansible/plugins/@{ plugin_type }@/@{ source }@?description=%23%23%23%23%23%20SUMMARY%0A%3C!---%20Your%20description%20here%20--%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr>`_ to improve it.
 
 
 .. hint::
