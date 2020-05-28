@@ -240,7 +240,10 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                             )
                             doc["author"] = ensure_list(doc["author"])
                             doc["description"] = ensure_list(doc["description"])
-                            convert_descriptions(doc["options"])
+                            try:
+                                convert_descriptions(doc["options"])
+                            except KeyError:
+                                pass  ## This module takes no options
 
                             module_rst_path = Path(path, "docs", doc["module"] + ".rst")
 
