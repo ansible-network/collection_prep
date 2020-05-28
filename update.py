@@ -15,8 +15,9 @@ import ruamel.yaml
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
-SUBDIRS = ("modules", "action")
+SUBDIRS = ("modules", "action", "become", "cliconf", "connection", "filter", "httpapi", "netconf", "terminal")
 SPECIALS = {"ospfv2": "OSPFv2", "interfaces": "Interfaces", "static": "Static"}
+
 
 def load_py_as_ast(path):
     """
@@ -55,7 +56,7 @@ def remove_assigment_in_ast(name, ast_file):
         ast_file.remove(res)
 
 
-def retrieve_module_name(bodypart):
+def retrieve_plugin_name(plugin_type, bodypart):
     """
     Retrieve the module name from a docstring
 
@@ -64,12 +65,14 @@ def retrieve_module_name(bodypart):
     """
     if not bodypart:
         logging.warning("Failed to find DOCUMENTATION assignment")
-        return
+        return ""
     documentation = ruamel.yaml.load(
         bodypart.value.to_python(), ruamel.yaml.RoundTripLoader
     )
 
-    name = documentation["module"]
+    if plugin_type == "modules":
+        plugin_type = "module"
+    name = documentation[plugin_type]
     return name
 
 
@@ -99,6 +102,7 @@ def update_documentation(bodypart):
     regex = re.compile(r"^\s+version_added\:\s.*$")
     example_lines = [l for l in example_lines if not re.match(regex, l)]
     bodypart.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
+
 
 def update_examples(bodypart, module_name, collection):
     """
@@ -137,7 +141,6 @@ def update_examples(bodypart, module_name, collection):
         ):
             example_lines[idx] = line.replace(module_name, full_module_name)
     bodypart.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
-
 
 
 def update_short_description(retrn, documentation, module_name):
@@ -190,7 +193,6 @@ def update_short_description(retrn, documentation, module_name):
         documentation.value.replace('"""\n' + repl + '\n"""')
 
 
-
 def black(filename):
     """
     Run black against the file
@@ -209,7 +211,13 @@ def process(collection, path):
         dirpath = "{colpath}{collection}/plugins/{subdir}".format(
             colpath=path, collection=collection, subdir=subdir
         )
-        for filename in os.listdir(dirpath):
+        try:
+            plugin_files = os.listdir(dirpath)
+        except FileNotFoundError:
+            # Looks like we don't have any of that type of plugin here
+            continue
+
+        for filename in plugin_files:
             if filename.endswith(".py"):
                 filename = "{dirpath}/{filename}".format(
                     dirpath=dirpath, filename=filename
@@ -218,7 +226,8 @@ def process(collection, path):
                 ast_obj = load_py_as_ast(filename)
 
                 # Get the module naem from the docstring
-                module_name = retrieve_module_name(
+                module_name = retrieve_plugin_name(
+                    subdir,
                     find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION")
                 )
                 if not module_name:
@@ -237,22 +246,23 @@ def process(collection, path):
                 )
                 logging.info("Updated documentation in %s", filename)
 
-                # Update the short description
-                update_short_description(
-                    retrn=find_assigment_in_ast(ast_file=ast_obj, name="RETURN"),
-                    documentation=find_assigment_in_ast(
-                        ast_file=ast_obj, name="DOCUMENTATION"
-                    ),
-                    module_name=module_name,
-                )
+                if dirpath == "modules":
+                    # Update the short description
+                    update_short_description(
+                        retrn=find_assigment_in_ast(ast_file=ast_obj, name="RETURN"),
+                        documentation=find_assigment_in_ast(
+                            ast_file=ast_obj, name="DOCUMENTATION"
+                        ),
+                        module_name=module_name,
+                    )
 
-                # Update the examples
-                update_examples(
-                    bodypart=find_assigment_in_ast(ast_file=ast_obj, name="EXAMPLES"),
-                    module_name=module_name,
-                    collection=collection,
-                )
-                logging.info("Updated examples in %s", filename)
+                    # Update the examples
+                    update_examples(
+                        bodypart=find_assigment_in_ast(ast_file=ast_obj, name="EXAMPLES"),
+                        module_name=module_name,
+                        collection=collection,
+                    )
+                    logging.info("Updated examples in %s", filename)
 
                 # Write out the file and black
                 filec = ast_obj.dumps()
