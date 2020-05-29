@@ -111,7 +111,7 @@ def update_readme(content, path, gh_url):
             else:
                 link = plugin
             data.append(
-                "{link}|{description}".format(link=link, description=description)
+                "{link}|{description}".format(link=link, description=description.replace('|', '\\|'))
             )
     readme = os.path.join(path, "README.md")
     try:
@@ -189,13 +189,14 @@ def handle_filters(collection, fullpath):
     filter_map = dict(zip(keys, values))
     for name, func in filter_map.items():
         if func in function_definitions:
-            comment = function_definitions[func] or ""
-            comment = [
-                c for c in comment.splitlines() if c and not c.startswith(":")
-            ]
+            comment = function_definitions[func] or \
+                        "{collection} {name} filter plugin".format(collection=collection, name=name)
+
+            # Get the first line from the docstring for the description and make that the short description.
+            comment = next(c for c in comment.splitlines() if c and not c.startswith(":"))
             plugins[
                 "{collection}.{name}".format(collection=collection, name=name)
-            ] = " ".join(comment)
+            ] = comment
     return plugins
 
 
