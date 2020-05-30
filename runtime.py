@@ -76,15 +76,22 @@ def process_runtime_plugin_routing(collection, path):
         short_name = module_name.split("_", 1)[-1]
 
         # handle action plugin redirection
-        if (
-            os.path.exists(os.path.join(action_path, f"{module_prefix}.py"))
-            and module_prefix == collection_name
-        ):
-            fq_action_name = f"{collection}.{module_prefix}"
-            if not plugin_routing.get("action"):
-                plugin_routing["action"] = {}
-            plugin_routing["action"].update({module_name: {"redirect": fq_action_name}})
-            plugin_routing["action"].update({short_name: {"redirect": fq_action_name}})
+        # if module name and action name is same skip the redirection as Ansible
+        # by design will invoke action plugin first.
+        if not os.path.exists(os.path.join(action_path, f"{module_name}.py")):
+            if (
+                os.path.exists(os.path.join(action_path, f"{module_prefix}.py"))
+                and module_prefix == collection_name
+            ):
+                fq_action_name = f"{collection}.{module_prefix}"
+                if not plugin_routing.get("action"):
+                    plugin_routing["action"] = {}
+                plugin_routing["action"].update(
+                    {module_name: {"redirect": fq_action_name}}
+                )
+                plugin_routing["action"].update(
+                    {short_name: {"redirect": fq_action_name}}
+                )
 
         # handle module short name redirection.
         # Add short redirection if module prefix and collection name is same
