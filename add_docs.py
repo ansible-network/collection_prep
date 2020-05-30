@@ -221,9 +221,9 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
 
     for subdir in SUBDIRS:
         if subdir == "modules":
-            doc_key = "module"
+            plugin_type = "module"
         else:
-            doc_key = subdir
+            plugin_type = subdir
 
         dirpath = Path(path, "plugins", subdir)
         if dirpath.is_dir():
@@ -240,6 +240,8 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                             fullpath, fragment_loader
                         )
                         if doc:
+                            doc['plugin_type'] = plugin_type
+
                             if returndocs:
                                 doc["returndocs"] = yaml.safe_load(returndocs)
                                 convert_descriptions(doc["returndocs"])
@@ -251,7 +253,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                                 doc["examples"] = examples
 
                             doc["module"] = "{collection}.{plugin_name}".format(
-                                collection=collection, plugin_name=doc[doc_key]
+                                collection=collection, plugin_name=doc[plugin_type]
                             )
                             doc["author"] = ensure_list(doc["author"])
                             doc["description"] = ensure_list(doc["description"])
