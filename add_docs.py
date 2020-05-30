@@ -111,7 +111,7 @@ def update_readme(content, path, gh_url):
             else:
                 link = plugin
             data.append(
-                "{link}|{description}".format(link=link, description=description)
+                "{link}|{description}".format(link=link, description=description.replace('|', '\\|'))
             )
     readme = os.path.join(path, "README.md")
     try:
@@ -160,28 +160,43 @@ def handle_filters(collection, fullpath):
         for node in module.body
         if isinstance(node, ast.ClassDef) and node.name == "FilterModule"
     ]
-    if classdef:
-        assign = [
-            node
-            for node in classdef[0].body
-            if isinstance(node, ast.Assign)
-            and hasattr(node, "targets")
-            and node.targets[0].id == "filter_map"
-        ]
-        if assign:
-            keys = [k.value for k in assign[0].value.keys]
-            logging.info("Adding filter plugins %s", ",".join(keys))
-            values = [k.id for k in assign[0].value.values]
-            filter_map = dict(zip(keys, values))
-            for name, func in filter_map.items():
-                if func in function_definitions:
-                    comment = function_definitions[func] or ""
-                    comment = [
-                        c for c in comment.splitlines() if c and not c.startswith(":")
-                    ]
-                    plugins[
-                        "{collection}.{name}".format(collection=collection, name=name)
-                    ] = " ".join(comment)
+    if not classdef:
+        return plugins
+
+    filter_func = [
+        func
+        for func in classdef[0].body
+        if isinstance(func, ast.FunctionDef)
+        and func.name == 'filters'
+    ]
+    if not filter_func:
+        return plugins
+
+    # The filter map is either looked up using the filter_map = {} assignment or if return returns a dict literal.
+    filter_map = next((
+        node
+        for node in filter_func[0].body if
+        (isinstance(node, ast.Assign) and hasattr(node, "targets") and node.targets[0].id == "filter_map") or
+        (isinstance(node, ast.Return) and isinstance(node.value, ast.Dict))
+    ), None)
+
+    if not filter_map:
+        return plugins
+
+    keys = [k.value for k in filter_map.value.keys]
+    logging.info("Adding filter plugins %s", ",".join(keys))
+    values = [k.id for k in filter_map.value.values]
+    filter_map = dict(zip(keys, values))
+    for name, func in filter_map.items():
+        if func in function_definitions:
+            comment = function_definitions[func] or \
+                        "{collection} {name} filter plugin".format(collection=collection, name=name)
+
+            # Get the first line from the docstring for the description and make that the short description.
+            comment = next(c for c in comment.splitlines() if c and not c.startswith(":"))
+            plugins[
+                "{collection}.{name}".format(collection=collection, name=name)
+            ] = comment
     return plugins
 
 
