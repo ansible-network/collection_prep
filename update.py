@@ -7,11 +7,10 @@ import os
 import re
 import sys
 import subprocess
-
-from argparse import ArgumentParser
-from redbaron import RedBaron
 import ruamel.yaml
 
+from argparse import ArgumentParser
+from utils import get_removed_at_date, load_py_as_ast, find_assigment_in_ast
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
@@ -27,31 +26,6 @@ SUBDIRS = (
     "terminal",
 )
 SPECIALS = {"ospfv2": "OSPFv2", "interfaces": "Interfaces", "static": "Static"}
-
-
-def load_py_as_ast(path):
-    """
-    Load a file as an ast object
-
-    :param path: The full path to the file
-    :return: The ast object
-    """
-    with open(path) as file:
-        data = file.read()
-        red = RedBaron(data)
-    return red
-
-
-def find_assigment_in_ast(name, ast_file):
-    """
-    Find an assignment in an ast object
-
-    :param name: The name of the assignement to find
-    :param ast_file: The ast object
-    :return: A list of ast object matching
-    """
-    res = ast_file.find("assignment", target=lambda x: x.dumps() == name)
-    return res
 
 
 def remove_assigment_in_ast(name, ast_file):
@@ -86,6 +60,13 @@ def retrieve_plugin_name(plugin_type, bodypart):
     return name
 
 
+def update_deprecation_notice(documentation):
+    if "deprecated" in documentation:
+        logging.info("Updating deprecation notice")
+        documentation["deprecated"].update({"removed_at_date": get_removed_at_date()})
+        documentation["deprecated"].pop("removed_in", None)
+
+
 def update_documentation(bodypart):
     """
     Update the docuementation of the module
@@ -98,6 +79,10 @@ def update_documentation(bodypart):
     documentation = ruamel.yaml.load(
         bodypart.value.to_python(), ruamel.yaml.RoundTripLoader
     )
+
+    # update deprecation to removed_at_date
+    update_deprecation_notice(documentation)
+
     # remove version added
     documentation.pop("version_added", None)
     desc_idx = [
@@ -138,6 +123,7 @@ def update_examples(bodypart, module_name, collection):
                 for k, v in task.items()
             ]
         )
+
     repl = ruamel.yaml.dump(example, None, ruamel.yaml.RoundTripDumper)
 
     # look in yaml comments for the module name as well and replace
@@ -194,8 +180,8 @@ def update_short_description(retrn, documentation, module_name):
     # Check for deprecated modules
     if "deprecated" in doc_section and not short_description.startswith("(deprecated)"):
         logging.info("Found to be deprecated")
-        short_description = "(deprecated) {short_description}".format(
-            short_description=short_description
+        short_description = (
+            f"(deprecated, removed after {get_removed_at_date()}) {short_description}"
         )
     # Change short if necessary
     if short_description != doc_section["short_description"]:
@@ -258,7 +244,7 @@ def process(collection, path):
                 )
                 logging.info("Updated documentation in %s", filename)
 
-                if dirpath == "modules":
+                if subdir == "modules":
                     # Update the short description
                     update_short_description(
                         retrn=find_assigment_in_ast(ast_file=ast_obj, name="RETURN"),
