@@ -1,7 +1,6 @@
 """
 Get ready for 1.0.0
 """
-import datetime
 import logging
 import platform
 import os
@@ -11,8 +10,7 @@ import glob
 from argparse import ArgumentParser
 
 import ruamel.yaml
-from update import load_py_as_ast, find_assigment_in_ast
-
+from utils import get_removed_at_date, load_py_as_ast, find_assigment_in_ast
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
@@ -23,18 +21,7 @@ REMOVAL_DAY_OF_MONTH = "01"
 
 
 def get_warning_msg(plugin_name):
-    today = datetime.date.today()
-    deprecation_year = today.year + DEPRECATION_CYCLE_IN_YEAR
-    if today.month % REMOVAL_FREQUENCY_IN_MONTHS:
-        depcrecation_month = (today.month + REMOVAL_FREQUENCY_IN_MONTHS) - (
-            today.month % REMOVAL_FREQUENCY_IN_MONTHS
-        )
-    else:
-        depcrecation_month = today.month
-
-    depcrecation_date = (
-        f"{deprecation_year}-{depcrecation_month}-{REMOVAL_DAY_OF_MONTH}"
-    )
+    depcrecation_date = get_removed_at_date()
     depcrecation_msg = f"{plugin_name} has been deprecated and will be removed in a release after {depcrecation_date}. See the plugin documentation for more details"
     return depcrecation_msg
 
