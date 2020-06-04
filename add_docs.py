@@ -29,7 +29,16 @@ logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
 
 IGNORE_FILES = ["__init__.py"]
-SUBDIRS = sorted(["become", "filter", "modules", "connection"])
+SUBDIRS = (
+    "become",
+    "cliconf",
+    "connection",
+    "filter",
+    "httpapi",
+    "netconf",
+    "terminal",
+    "modules",
+)
 TEMPLATE_DIR = "./"
 
 
@@ -167,28 +176,35 @@ def handle_filters(collection, fullpath):
     if not classdef:
         return plugins
 
-    filter_func = [
-        func
-        for func in classdef[0].body
-        if isinstance(func, ast.FunctionDef) and func.name == "filters"
-    ]
-    if not filter_func:
-        return plugins
-
-    # The filter map is either looked up using the filter_map = {} assignment or if return returns a dict literal.
     filter_map = next(
         (
             node
-            for node in filter_func[0].body
-            if (
-                isinstance(node, ast.Assign)
-                and hasattr(node, "targets")
-                and node.targets[0].id == "filter_map"
-            )
-            or (isinstance(node, ast.Return) and isinstance(node.value, ast.Dict))
+            for node in classdef[0].body
+            if isinstance(node, ast.Assign)
+            and hasattr(node, "targets")
+            and node.targets[0].id == "filter_map"
         ),
         None,
     )
+
+    if not filter_map:
+        filter_func = [
+            func
+            for func in classdef[0].body
+            if isinstance(func, ast.FunctionDef) and func.name == "filters"
+        ]
+        if not filter_func:
+            return plugins
+
+        # The filter map is either looked up using the filter_map = {} assignment or if return returns a dict literal.
+        filter_map = next(
+            (
+                node
+                for node in filter_func[0].body
+                if isinstance(node, ast.Return) and isinstance(node.value, ast.Dict)
+            ),
+            None,
+        )
 
     if not filter_map:
         return plugins
@@ -275,7 +291,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                             try:
                                 convert_descriptions(doc["options"])
                             except KeyError:
-                                pass  ## This module takes no options
+                                pass  # This module takes no options
 
                             module_rst_path = Path(path, "docs", doc["module"] + ".rst")
 
