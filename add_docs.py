@@ -24,6 +24,7 @@ from jinja_utils import (
     documented_type,
 )
 
+
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
 
@@ -42,6 +43,7 @@ def ensure_list(value):
     if isinstance(value, list):
         return value
     return [value]
+
 
 def convert_descriptions(data):
     """ Convert the descriptions for doc into lists
@@ -111,7 +113,9 @@ def update_readme(content, path, gh_url):
             else:
                 link = plugin
             data.append(
-                "{link}|{description}".format(link=link, description=description.replace('|', '\\|'))
+                "{link}|{description}".format(
+                    link=link, description=description.replace("|", "\\|")
+                )
             )
     readme = os.path.join(path, "README.md")
     try:
@@ -136,7 +140,7 @@ def update_readme(content, path, gh_url):
 
 
 def handle_filters(collection, fullpath):
-    """ Grab each filter from a filter plugin file and 
+    """ Grab each filter from a filter plugin file and
     use the def comment if available
 
     :param collection: The full collection name
@@ -166,19 +170,25 @@ def handle_filters(collection, fullpath):
     filter_func = [
         func
         for func in classdef[0].body
-        if isinstance(func, ast.FunctionDef)
-        and func.name == 'filters'
+        if isinstance(func, ast.FunctionDef) and func.name == "filters"
     ]
     if not filter_func:
         return plugins
 
     # The filter map is either looked up using the filter_map = {} assignment or if return returns a dict literal.
-    filter_map = next((
-        node
-        for node in filter_func[0].body if
-        (isinstance(node, ast.Assign) and hasattr(node, "targets") and node.targets[0].id == "filter_map") or
-        (isinstance(node, ast.Return) and isinstance(node.value, ast.Dict))
-    ), None)
+    filter_map = next(
+        (
+            node
+            for node in filter_func[0].body
+            if (
+                isinstance(node, ast.Assign)
+                and hasattr(node, "targets")
+                and node.targets[0].id == "filter_map"
+            )
+            or (isinstance(node, ast.Return) and isinstance(node.value, ast.Dict))
+        ),
+        None,
+    )
 
     if not filter_map:
         return plugins
@@ -189,11 +199,16 @@ def handle_filters(collection, fullpath):
     filter_map = dict(zip(keys, values))
     for name, func in filter_map.items():
         if func in function_definitions:
-            comment = function_definitions[func] or \
-                        "{collection} {name} filter plugin".format(collection=collection, name=name)
+            comment = function_definitions[
+                func
+            ] or "{collection} {name} filter plugin".format(
+                collection=collection, name=name
+            )
 
             # Get the first line from the docstring for the description and make that the short description.
-            comment = next(c for c in comment.splitlines() if c and not c.startswith(":"))
+            comment = next(
+                c for c in comment.splitlines() if c and not c.startswith(":")
+            )
             plugins[
                 "{collection}.{name}".format(collection=collection, name=name)
             ] = comment
@@ -240,7 +255,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                             fullpath, fragment_loader
                         )
                         if doc:
-                            doc['plugin_type'] = plugin_type
+                            doc["plugin_type"] = plugin_type
 
                             if returndocs:
                                 doc["returndocs"] = yaml.safe_load(returndocs)
