@@ -38,7 +38,7 @@ Version added: @{ version_added | default('') }@
 DEPRECATED
 ----------
 {# use unknown here? skip the fields? #}
-:Removed in Ansible: version: @{ deprecated['removed_in'] | default('') | string | rst_ify }@
+:Removed in collection release after @{ deprecated['removed_at_date'] | default('') | string | rst_ify }@
 :Why: @{ deprecated['why'] | default('') | rst_ify }@
 :Alternative: @{ deprecated['alternative'] | default('') | rst_ify }@
 

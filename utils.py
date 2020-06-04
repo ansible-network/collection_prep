@@ -22,7 +22,7 @@ def get_removed_at_date():
         depcrecation_month = today.month
 
     depcrecation_date = (
-        f"{deprecation_year}-{depcrecation_month}-{REMOVAL_DAY_OF_MONTH}"
+        f"{deprecation_year}-{depcrecation_month:02d}-{REMOVAL_DAY_OF_MONTH}"
     )
 
     return depcrecation_date
