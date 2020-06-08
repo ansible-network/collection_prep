@@ -20,9 +20,8 @@ REMOVAL_FREQUENCY_IN_MONTHS = 3
 REMOVAL_DAY_OF_MONTH = "01"
 
 
-def get_warning_msg(plugin_name):
-    depcrecation_date = get_removed_at_date()
-    depcrecation_msg = f"{plugin_name} has been deprecated and will be removed in a release after {depcrecation_date}. See the plugin documentation for more details"
+def get_warning_msg(plugin_name=None):
+    depcrecation_msg = "See the plugin documentation for more details"
     return depcrecation_msg
 
 
@@ -99,9 +98,10 @@ def process_runtime_plugin_routing(collection, path):
                 {
                     module_name: {
                         "deprecation": {
+                            "removal_date": get_removed_at_date(),
                             "warning_text": get_warning_msg(
                                 f"{collection}.{module_name}"
-                            )
+                            ),
                         }
                     }
                 }
@@ -113,9 +113,10 @@ def process_runtime_plugin_routing(collection, path):
                 plugin_routing["modules"][short_name].update(
                     {
                         "deprecation": {
+                            "removal_date": get_removed_at_date(),
                             "warning_text": get_warning_msg(
                                 f"{collection}.{short_name}"
-                            )
+                            ),
                         }
                     }
                 )
@@ -152,8 +153,6 @@ def main():
     """
     The entry point
     """
-    if not platform.python_version().startswith("3.8"):
-        sys.exit("Python 3.8+ required")
     parser = ArgumentParser()
     parser.add_argument(
         "-c", "--collection", help="The name of the collection", required=True
