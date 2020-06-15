@@ -15,6 +15,7 @@ from utils import get_removed_at_date, load_py_as_ast, find_assigment_in_ast
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
 COLLECTION_MIN_ANSIBLE_VERSION = ">=2.9"
+COLLECTION_MAX_ANSIBLE_VERSION = "<2.11"
 DEPRECATION_CYCLE_IN_YEAR = 2
 REMOVAL_FREQUENCY_IN_MONTHS = 3
 REMOVAL_DAY_OF_MONTH = "01"
@@ -130,7 +131,10 @@ def process(collection, path):
     if not os.path.exists(collection_path):
         logging.error(f"{collection_path} does not exit")
 
-    rt_obj["requires_ansible"] = COLLECTION_MIN_ANSIBLE_VERSION
+    supported_ansible_versions = COLLECTION_MIN_ANSIBLE_VERSION
+    if COLLECTION_MAX_ANSIBLE_VERSION:
+        supported_ansible_versions += ',' + COLLECTION_MAX_ANSIBLE_VERSION
+    rt_obj["requires_ansible"] = supported_ansible_versions
     plugin_routing = process_runtime_plugin_routing(collection, path)
     if plugin_routing:
         rt_obj["plugin_routing"] = plugin_routing
