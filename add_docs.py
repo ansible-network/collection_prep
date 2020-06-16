@@ -36,10 +36,18 @@ SUBDIRS = (
     "filter",
     "httpapi",
     "netconf",
-    "terminal",
     "modules",
 )
 TEMPLATE_DIR = "./"
+ANSIBLE_COMPAT = """## Ansible version compatibility
+
+Plugins and modules within a collection may be tested with only specific Ansible versions. 
+A collection may contain metadata that identifies these versions. 
+PEP440 is the schema used to describe the versions of Ansible.
+
+This collection has been tested against following Ansible versions: **{requires_ansible}**.
+"""
+
 
 
 def ensure_list(value):
@@ -107,10 +115,10 @@ def update_readme(content, path, gh_url):
     for plugin_type, plugins in content.items():
         logging.info("Processing '%s' for README", plugin_type)
         if plugin_type == "modules":
-            data.append("## Modules")
+            data.append("### Modules")
         else:
             data.append(
-                "## {plugin_type} plugins".format(plugin_type=plugin_type.capitalize())
+                "### {plugin_type} plugins".format(plugin_type=plugin_type.capitalize())
             )
         data.append("Name | Description")
         data.append("--- | ---")
@@ -318,6 +326,23 @@ def load_galaxy(path):
         logging.error("Unable to find galaxy.yml in %s", path)
         sys.exit(1)
 
+def load_runtime(path):
+    """ Load runtime details from the runtime.yml file in the collection
+
+    :param path: The path the collection
+    :return: The runtime dict
+    """
+    try:
+        with open(Path(path, "meta/runtime.yml"), "r") as stream:
+            try:
+                return yaml.safe_load(stream)
+            except yaml.YAMLError as _exc:
+                logging.error("Unable to parse runtime.yml in %s", path)
+                sys.exit(1)
+    except FileNotFoundError:
+        logging.error("Unable to find runtime.yml in %s", path)
+        sys.exit(1)
+
 
 def link_collection(path, galaxy):
     """ Link the provided collection into the Ansible default collection path
@@ -354,6 +379,40 @@ def link_collection(path, galaxy):
     collection_directory.symlink_to(path)
 
 
+def add_ansible_compatibility(runtime, path):
+    """ Add ansible compatibility information to README
+
+    :param runtime: runtime.yml contents
+    :type runtime: dict
+    :param path: A path
+    :type path: str
+    """
+    requires_ansible = runtime.get('requires_ansible')
+    if not requires_ansible:
+        logging.error("Unable to find requires_ansible in runtime.yml, not added to README")
+        return
+    readme = os.path.join(path, "README.md")
+    try:
+        with open(readme) as f:
+            content = f.read().splitlines()
+    except FileNotFoundError:
+        logging.error("README.md not found in %s", path)
+        logging.error("README.md not updated")
+        sys.exit(1)
+    try:
+        start = content.index("<!--start requires_ansible-->")
+        end = content.index("<!--end requires_ansible-->")
+    except ValueError as _err:
+        logging.error("requires_ansible anchors not found in %s", readme)
+        logging.error("README.md not updated with ansible compatibility information")
+        sys.exit(1)
+    if start and end:
+        data = ANSIBLE_COMPAT.format(requires_ansible=requires_ansible).splitlines()
+        new = content[0 : start + 1] + data + content[end:]
+        with open(readme, "w") as fhand:
+            fhand.write("\n".join(new))
+        logging.info("README.md updated with ansible compatibility information")
+
 def main():
     """
     The entry point
@@ -377,6 +436,8 @@ def main():
     link_collection(path, galaxy)
     content = process(collection=collection, path=path)
     update_readme(content=content, path=args.path, gh_url=gh_url)
+    runtime = load_runtime(path=path)
+    add_ansible_compatibility(runtime=runtime, path=args.path)
 
 
 if __name__ == "__main__":
