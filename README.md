@@ -34,7 +34,15 @@ This is intended to operate against the repository clone.
 
 This will generate an RST file for each plugin in the collection docs folder and add a table of links for all plugin types in the REAMDE.md
 
-Ensure the collection README.md has the following in it:
+This will also pull the rewuires_ansible information from the runtime.yml file and add an ansible compatibility section to the REAMDE.
+
+For the ansible compatibility, ensure the collection README.md has the following in it:
+```
+<!--start requires_ansible-->
+<!--end requires_ansible-->
+```
+
+For the plugin table, ensure the collection README.md has the following in it:
 ```
 
 <!--start collection content-->
