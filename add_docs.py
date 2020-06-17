@@ -124,8 +124,8 @@ def update_readme(content, path, gh_url):
         data.append("--- | ---")
         for plugin, description in sorted(plugins.items()):
             if plugin_type != "filter":
-                link = "[{plugin}]({gh_url}/blob/master/docs/{plugin}.rst)".format(
-                    gh_url=gh_url, plugin=plugin
+                link = "[{plugin}]({gh_url}/blob/master/docs/{plugin}_{plugin_type}.rst)".format(
+                    gh_url=gh_url, plugin=plugin, plugin_type=plugin_type.replace("modules", "module")
                 )
             else:
                 link = plugin
@@ -301,7 +301,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                             except KeyError:
                                 pass  # This module takes no options
 
-                            module_rst_path = Path(path, "docs", doc["module"] + ".rst")
+                            module_rst_path = Path(path, "docs", doc["module"] + "_{0}".format(plugin_type) + ".rst")
 
                             with open(module_rst_path, "w") as fd:
                                 fd.write(template.render(doc))
