@@ -134,6 +134,7 @@ def update_readme(content, path, gh_url):
                     link=link, description=description.replace("|", "\\|")
                 )
             )
+        data.append("")
     readme = os.path.join(path, "README.md")
     try:
         with open(readme) as f:

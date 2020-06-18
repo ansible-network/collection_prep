@@ -14,7 +14,7 @@ from utils import get_removed_at_date, load_py_as_ast, find_assigment_in_ast
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
-COLLECTION_MIN_ANSIBLE_VERSION = ">=2.9"
+COLLECTION_MIN_ANSIBLE_VERSION = ">=2.9.10"
 COLLECTION_MAX_ANSIBLE_VERSION = "<2.11"
 DEPRECATION_CYCLE_IN_YEAR = 2
 REMOVAL_FREQUENCY_IN_MONTHS = 3
