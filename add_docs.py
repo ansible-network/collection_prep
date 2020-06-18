@@ -43,11 +43,10 @@ ANSIBLE_COMPAT = """## Ansible version compatibility
 
 This collection has been tested against following Ansible versions: **{requires_ansible}**.
 
-Plugins and modules within a collection may be tested with only specific Ansible versions. 
-A collection may contain metadata that identifies these versions. 
+Plugins and modules within a collection may be tested with only specific Ansible versions.
+A collection may contain metadata that identifies these versions.
 PEP440 is the schema used to describe the versions of Ansible.
 """
-
 
 
 def ensure_list(value):
@@ -131,7 +130,7 @@ def update_readme(content, path, gh_url):
                 link = plugin
             data.append(
                 "{link}|{description}".format(
-                    link=link, description=description.replace("|", "\\|")
+                    link=link, description=description.replace("|", "\\|").strip()
                 )
             )
     readme = os.path.join(path, "README.md")
@@ -326,6 +325,7 @@ def load_galaxy(path):
         logging.error("Unable to find galaxy.yml in %s", path)
         sys.exit(1)
 
+
 def load_runtime(path):
     """ Load runtime details from the runtime.yml file in the collection
 
@@ -412,6 +412,7 @@ def add_ansible_compatibility(runtime, path):
         with open(readme, "w") as fhand:
             fhand.write("\n".join(new))
         logging.info("README.md updated with ansible compatibility information")
+
 
 def main():
     """
