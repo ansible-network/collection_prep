@@ -1,8 +1,3 @@
-{# avoids rST "isn't included in any toctree" errors for module docs #}
-{% if plugin_type == 'module' %}
-:orphan:
-{% endif %}
-
 .. _@{ module }@_@{ plugin_type }@:
 {% for alias in aliases %}
 .. _@{ alias }@_@{ plugin_type }@:
