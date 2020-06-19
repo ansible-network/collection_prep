@@ -282,7 +282,11 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                             doc["plugin_type"] = plugin_type
 
                             if returndocs:
-                                doc["returndocs"] = yaml.safe_load(returndocs)
+                                # Seems a recent change in devel makes this return a dict not a yaml string.
+                                if isinstance(returndocs, dict):
+                                    doc["returndocs"] = returndocs
+                                else:
+                                    doc["returndocs"] = yaml.safe_load(returndocs)
                                 convert_descriptions(doc["returndocs"])
 
                             doc["metadata"] = (metadata,)
