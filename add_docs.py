@@ -35,6 +35,7 @@ SUBDIRS = (
     "connection",
     "filter",
     "httpapi",
+    "lookup",
     "netconf",
     "modules",
 )
