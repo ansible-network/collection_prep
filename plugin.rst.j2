@@ -61,7 +61,7 @@ Requirements
 {%   if plugin_type == 'module' %}
 The below requirements are needed on the host that executes this @{ plugin_type }@.
 {%   else %}
-The below requirements are needed on the local master node that executes this @{ plugin_type }@.
+The below requirements are needed on the local Ansible controller node that executes this @{ plugin_type }@.
 {%   endif %}
 
 {%   for req in requirements %}
