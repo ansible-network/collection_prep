@@ -38,6 +38,7 @@ SUBDIRS = (
     "lookup",
     "netconf",
     "modules",
+    "inventory",
 )
 TEMPLATE_DIR = "./"
 ANSIBLE_COMPAT = """## Ansible version compatibility
@@ -79,7 +80,7 @@ def convert_descriptions(data):
 
 
 def jinja_environment():
-    """ Define the jinja enviroment
+    """ Define the jinja environment
 
     :return: A jinja template, with the env set
     """
@@ -108,7 +109,7 @@ def update_readme(content, path, gh_url):
     :type collection: str
     :param path: The path to the collection
     :type path: str
-    :param gh_url: The url to the gihub repository
+    :param gh_url: The url to the GitHub repository
     :type gh_url: str
     """
     data = []
@@ -125,7 +126,7 @@ def update_readme(content, path, gh_url):
         for plugin, description in sorted(plugins.items()):
             if plugin_type != "filter":
                 link = "[{plugin}]({gh_url}/blob/master/docs/{plugin}_{plugin_type}.rst)".format(
-                    gh_url=gh_url, plugin=plugin, plugin_type=plugin_type.replace("modules", "module")
+                    gh_url=gh_url.replace(".git", ""), plugin=plugin, plugin_type=plugin_type.replace("modules", "module")
                 )
             else:
                 link = plugin
@@ -165,7 +166,7 @@ def handle_filters(collection, fullpath):
     :type collection: str
     :param fullpath: The full path to the filter plugin file
     :type fullpath: str
-    :return: A doct of filter plugins + descriptions
+    :return: A doc of filter plugins + descriptions
     """
 
     plugins = {}
@@ -279,6 +280,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                         doc, examples, returndocs, metadata = plugin_docs.get_docstring(
                             fullpath, fragment_loader
                         )
+
                         if doc:
                             doc["plugin_type"] = plugin_type
 
@@ -297,7 +299,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                                 doc["examples"] = examples
 
                             doc["module"] = "{collection}.{plugin_name}".format(
-                                collection=collection, plugin_name=doc[plugin_type]
+                                collection=collection, plugin_name=doc.get(plugin_type, doc.get('name'))
                             )
                             doc["author"] = ensure_list(doc["author"])
                             doc["description"] = ensure_list(doc["description"])
@@ -378,7 +380,7 @@ def link_collection(path, galaxy):
             logging.info("Deleteing: %s", collection_directory)
             shutil.rmtree(collection_directory)
 
-    logging.info("Creating namepsace directory %s", namespace_directory)
+    logging.info("Creating namespace directory %s", namespace_directory)
     namespace_directory.mkdir(parents=True, exist_ok=True)
 
     logging.info("Linking collection %s -> %s", path, collection_directory)
@@ -439,7 +441,7 @@ def main():
     )
     logging.info("Setting collection name to %s", collection)
     gh_url = galaxy["repository"]
-    logging.info("Setting github repository url to %s", gh_url)
+    logging.info("Setting GitHub repository url to %s", gh_url)
     link_collection(path, galaxy)
     content = process(collection=collection, path=path)
     update_readme(content=content, path=args.path, gh_url=gh_url)
