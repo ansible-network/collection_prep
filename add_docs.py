@@ -40,7 +40,7 @@ SUBDIRS = (
     "modules",
     "inventory",
 )
-TEMPLATE_DIR = "./"
+TEMPLATE_DIR = os.path.dirname(__file__)
 ANSIBLE_COMPAT = """## Ansible version compatibility
 
 This collection has been tested against following Ansible versions: **{requires_ansible}**.
@@ -100,7 +100,7 @@ def jinja_environment():
     return template
 
 
-def update_readme(content, path, gh_url):
+def update_readme(content, path, gh_url, branch_name):
     """ Update the README.md in the repository
 
     :param content: The dict containing the content
@@ -111,6 +111,8 @@ def update_readme(content, path, gh_url):
     :type path: str
     :param gh_url: The url to the GitHub repository
     :type gh_url: str
+    :param branch_name: The name of the main repository branch
+    :type branch_name: str
     """
     data = []
     for plugin_type, plugins in content.items():
@@ -125,8 +127,9 @@ def update_readme(content, path, gh_url):
         data.append("--- | ---")
         for plugin, description in sorted(plugins.items()):
             if plugin_type != "filter":
-                link = "[{plugin}]({gh_url}/blob/master/docs/{plugin}_{plugin_type}.rst)".format(
-                    gh_url=gh_url.replace(".git", ""), plugin=plugin, plugin_type=plugin_type.replace("modules", "module")
+                link = "[{plugin}]({gh_url}/blob/{branch_name}/docs/{plugin}_{plugin_type}.rst)".format(
+                    branch_name=branch_name, gh_url=gh_url, plugin=plugin,
+                    plugin_type=plugin_type.replace("modules", "module")
                 )
             else:
                 link = plugin
@@ -433,6 +436,13 @@ def main():
         help="The path to the collection (ie ./ansible.netcommon",
         required=True,
     )
+    parser.add_argument(
+        "-b",
+        "--branch-name",
+        dest="branch_name",
+        default="master",
+        help="The name of the main branch of the collection",
+    )
     args = parser.parse_args()
     path = Path(args.path).absolute()
     galaxy = load_galaxy(path=path)
@@ -444,7 +454,7 @@ def main():
     logging.info("Setting GitHub repository url to %s", gh_url)
     link_collection(path, galaxy)
     content = process(collection=collection, path=path)
-    update_readme(content=content, path=args.path, gh_url=gh_url)
+    update_readme(content=content, path=args.path, gh_url=gh_url, branch_name=args.branch_name)
     runtime = load_runtime(path=path)
     add_ansible_compatibility(runtime=runtime, path=args.path)
 
