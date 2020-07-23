@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
+
 """ doc generator
 """
 import ast
@@ -23,6 +26,11 @@ from jinja_utils import (
     rst_ify,
     documented_type,
 )
+
+try:
+    import argcomplete
+except ImportError:
+    argcomplete = None
 
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
@@ -443,6 +451,10 @@ def main():
         default="master",
         help="The name of the main branch of the collection",
     )
+
+    if argcomplete:
+        argcomplete.autocomplete(parser)
+
     args = parser.parse_args()
     path = Path(args.path).absolute()
     galaxy = load_galaxy(path=path)
