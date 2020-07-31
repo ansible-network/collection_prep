@@ -96,6 +96,7 @@ def jinja_environment():
         loader=FileSystemLoader(TEMPLATE_DIR),
         variable_start_string="@{",
         variable_end_string="}@",
+        lstrip_blocks=True,
         trim_blocks=True,
     )
     env.filters["rst_ify"] = rst_ify
@@ -166,6 +167,10 @@ def update_readme(content, path, gh_url, branch_name):
         new = content[0 : start + 1] + data + content[end:]
         with open(readme, "w") as fhand:
             fhand.write("\n".join(new))
+            # Avoid "No newline at end of file.
+            # No, I don't know why it has to be two of them.
+            # Yes, it actually does have to be two of them.
+            fhand.write("\n\n")
         logging.info("README.md updated")
 
 
@@ -305,7 +310,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
 
                             doc["metadata"] = (metadata,)
                             if isinstance(examples, string_types):
-                                doc["plainexamples"] = examples
+                                doc["plainexamples"] = examples.strip()
                             else:
                                 doc["examples"] = examples
 
