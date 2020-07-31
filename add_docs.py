@@ -309,7 +309,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
 
                             doc["metadata"] = (metadata,)
                             if isinstance(examples, string_types):
-                                doc["plainexamples"] = examples
+                                doc["plainexamples"] = examples.strip()
                             else:
                                 doc["examples"] = examples
 
