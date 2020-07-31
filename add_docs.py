@@ -448,7 +448,7 @@ def main():
         "-b",
         "--branch-name",
         dest="branch_name",
-        default="master",
+        default="main",
         help="The name of the main branch of the collection",
     )
 
