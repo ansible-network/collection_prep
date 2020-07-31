@@ -96,6 +96,7 @@ def jinja_environment():
         loader=FileSystemLoader(TEMPLATE_DIR),
         variable_start_string="@{",
         variable_end_string="}@",
+        lstrip_blocks=True,
         trim_blocks=True,
     )
     env.filters["rst_ify"] = rst_ify
