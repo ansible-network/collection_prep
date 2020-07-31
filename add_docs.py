@@ -166,6 +166,10 @@ def update_readme(content, path, gh_url, branch_name):
         new = content[0 : start + 1] + data + content[end:]
         with open(readme, "w") as fhand:
             fhand.write("\n".join(new))
+            # Avoid "No newline at end of file.
+            # No, I don't know why it has to be two of them.
+            # Yes, it actually does have to be two of them.
+            fhand.write("\n\n")
         logging.info("README.md updated")
 
 
