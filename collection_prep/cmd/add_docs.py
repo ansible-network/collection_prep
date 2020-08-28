@@ -456,6 +456,12 @@ def main():
         default="main",
         help="The name of the main branch of the collection",
     )
+    parser.add_argument(
+        "--link-collection",
+        dest="link_collection",
+        default=False,
+        help="Link the collection in ~/.ansible/collections",
+    )
 
     if argcomplete:
         argcomplete.autocomplete(parser)
@@ -469,7 +475,8 @@ def main():
     logging.info("Setting collection name to %s", collection)
     gh_url = galaxy["repository"]
     logging.info("Setting GitHub repository url to %s", gh_url)
-    link_collection(path, galaxy)
+    if args.link_collection:
+        link_collection(path, galaxy)
     content = process(collection=collection, path=path)
     update_readme(content=content, path=args.path, gh_url=gh_url, branch_name=args.branch_name)
     runtime = load_runtime(path=path)
