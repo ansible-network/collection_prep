@@ -19,7 +19,7 @@ from ansible.utils import plugin_docs
 from ansible.plugins.loader import fragment_loader
 from ansible.module_utils.six import string_types
 from jinja2 import Environment, FileSystemLoader
-from jinja_utils import (
+from collection_prep.jinja_utils import (
     to_kludge_ns,
     from_kludge_ns,
     html_ify,

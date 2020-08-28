@@ -1,9 +1,15 @@
 # 1.0.0 prep engine
 
 
+## INSTALLATION
+
+```console
+pip install .
+```
+
 ## CONTENT UPDATER
 ```console
-python update.py -c arista.eos -p ./
+collection_prep_update -c arista.eos -p ./
 ```
 
 ```console
@@ -50,7 +56,7 @@ For the plugin table, ensure the collection README.md has the following in it:
 ```
 
 ```console
-python add_docs.py -p ./ansible.netcommon     
+collection_prep_add_docs -p ./ansible.netcommon
 ```
 
 ```console
@@ -114,7 +120,7 @@ INFO      README.md updated
 
 This is intended to operate against the repository clone.
 ```console
-python runtime.py -c arista.eos -p ./
+collection_prep_runtime -c arista.eos -p ./
 ```
 ```console
 INFO      -------------------Processing runtime.yml for module eos_acl_interfaces
