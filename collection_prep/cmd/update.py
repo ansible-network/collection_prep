@@ -10,7 +10,7 @@ import subprocess
 import ruamel.yaml
 
 from argparse import ArgumentParser
-from utils import get_removed_at_date, load_py_as_ast, find_assigment_in_ast
+from collection_prep.utils import get_removed_at_date, load_py_as_ast, find_assigment_in_ast
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
