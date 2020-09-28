@@ -6,6 +6,7 @@
 import ast
 import logging
 import os
+import re
 import shutil
 import sys
 from argparse import ArgumentParser
@@ -137,7 +138,7 @@ def update_readme(content, path, gh_url, branch_name):
         for plugin, description in sorted(plugins.items()):
             if plugin_type != "filter":
                 link = "[{plugin}]({gh_url}/blob/{branch_name}/docs/{plugin}_{plugin_type}.rst)".format(
-                    branch_name=branch_name, gh_url=gh_url, plugin=plugin,
+                    branch_name=branch_name, gh_url=re.sub(r"\.git$", "", gh_url), plugin=plugin,
                     plugin_type=plugin_type.replace("modules", "module")
                 )
             else:
