@@ -48,7 +48,7 @@ SUBDIRS = (
     "lookup",
     "netconf",
     "modules",
-    "test"
+    "test",
 )
 TEMPLATE_DIR = os.path.dirname(__file__)
 ANSIBLE_COMPAT = """## Ansible version compatibility
@@ -82,7 +82,9 @@ def convert_descriptions(data):
     if data:
         for definition in data.values():
             if "description" in definition:
-                definition["description"] = ensure_list(definition["description"])
+                definition["description"] = ensure_list(
+                    definition["description"]
+                )
             if "suboptions" in definition:
                 convert_descriptions(definition["suboptions"])
             if "contains" in definition:
@@ -132,21 +134,26 @@ def update_readme(content, path, gh_url, branch_name):
             data.append("### Modules")
         else:
             data.append(
-                "### {plugin_type} plugins".format(plugin_type=plugin_type.capitalize())
+                "### {plugin_type} plugins".format(
+                    plugin_type=plugin_type.capitalize()
+                )
             )
         data.append("Name | Description")
         data.append("--- | ---")
         for plugin, description in sorted(plugins.items()):
             if plugin_type not in ["filter", "test"]:
                 link = "[{plugin}]({gh_url}/blob/{branch_name}/docs/{plugin}_{plugin_type}.rst)".format(
-                    branch_name=branch_name, gh_url=re.sub(r"\.git$", "", gh_url), plugin=plugin,
-                    plugin_type=plugin_type.replace("modules", "module")
+                    branch_name=branch_name,
+                    gh_url=re.sub(r"\.git$", "", gh_url),
+                    plugin=plugin,
+                    plugin_type=plugin_type.replace("modules", "module"),
                 )
             else:
                 link = plugin
             data.append(
                 "{link}|{description}".format(
-                    link=link, description=description.replace("|", "\\|").strip()
+                    link=link,
+                    description=description.replace("|", "\\|").strip(),
                 )
             )
         data.append("")
@@ -201,7 +208,6 @@ def handle_simple(collection, fullpath, kind):
         logging.error("Only filter and test are supported simple types")
         sys.exit(1)
 
-
     plugins = {}
     with open(fullpath) as fhand:
         file_contents = fhand.read()
@@ -244,7 +250,8 @@ def handle_simple(collection, fullpath, kind):
             (
                 node
                 for node in simple_func[0].body
-                if isinstance(node, ast.Return) and isinstance(node.value, ast.Dict)
+                if isinstance(node, ast.Return)
+                and isinstance(node.value, ast.Dict)
             ),
             None,
         )
@@ -308,9 +315,16 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                     fullpath = Path(dirpath, filename)
                     logging.info("Processing %s", fullpath)
                     if subdir in ["filter", "test"]:
-                        content[subdir].update(handle_simple(collection, fullpath, subdir))
+                        content[subdir].update(
+                            handle_simple(collection, fullpath, subdir)
+                        )
                     else:
-                        doc, examples, returndocs, metadata = plugin_docs.get_docstring(
+                        (
+                            doc,
+                            examples,
+                            returndocs,
+                            metadata,
+                        ) = plugin_docs.get_docstring(
                             fullpath, fragment_loader
                         )
 
@@ -322,7 +336,9 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                                 if isinstance(returndocs, dict):
                                     doc["returndocs"] = returndocs
                                 else:
-                                    doc["returndocs"] = yaml.safe_load(returndocs)
+                                    doc["returndocs"] = yaml.safe_load(
+                                        returndocs
+                                    )
                                 convert_descriptions(doc["returndocs"])
 
                             doc["metadata"] = (metadata,)
@@ -331,21 +347,36 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                             else:
                                 doc["examples"] = examples
 
-                            doc["module"] = "{collection}.{plugin_name}".format(
-                                collection=collection, plugin_name=doc.get(plugin_type, doc.get('name'))
+                            doc[
+                                "module"
+                            ] = "{collection}.{plugin_name}".format(
+                                collection=collection,
+                                plugin_name=doc.get(
+                                    plugin_type, doc.get("name")
+                                ),
                             )
                             doc["author"] = ensure_list(doc["author"])
-                            doc["description"] = ensure_list(doc["description"])
+                            doc["description"] = ensure_list(
+                                doc["description"]
+                            )
                             try:
                                 convert_descriptions(doc["options"])
                             except KeyError:
                                 pass  # This module takes no options
 
-                            module_rst_path = Path(path, "docs", doc["module"] + "_{0}".format(plugin_type) + ".rst")
+                            module_rst_path = Path(
+                                path,
+                                "docs",
+                                doc["module"]
+                                + "_{0}".format(plugin_type)
+                                + ".rst",
+                            )
 
                             with open(module_rst_path, "w") as fd:
                                 fd.write(template.render(doc))
-                            content[subdir][doc["module"]] = doc["short_description"]
+                            content[subdir][doc["module"]] = doc[
+                                "short_description"
+                            ]
     return content
 
 
@@ -394,7 +425,9 @@ def link_collection(path, galaxy):
     :type galaxy: dict
     """
 
-    collection_root = Path(Path.home(), ".ansible/collections/ansible_collections")
+    collection_root = Path(
+        Path.home(), ".ansible/collections/ansible_collections"
+    )
     namespace_directory = Path(collection_root, galaxy["namespace"])
     collection_directory = Path(namespace_directory, galaxy["name"])
 
@@ -428,9 +461,11 @@ def add_ansible_compatibility(runtime, path):
     :param path: A path
     :type path: str
     """
-    requires_ansible = runtime.get('requires_ansible')
+    requires_ansible = runtime.get("requires_ansible")
     if not requires_ansible:
-        logging.error("Unable to find requires_ansible in runtime.yml, not added to README")
+        logging.error(
+            "Unable to find requires_ansible in runtime.yml, not added to README"
+        )
         return
     readme = os.path.join(path, "README.md")
     try:
@@ -445,14 +480,20 @@ def add_ansible_compatibility(runtime, path):
         end = content.index("<!--end requires_ansible-->")
     except ValueError as _err:
         logging.error("requires_ansible anchors not found in %s", readme)
-        logging.error("README.md not updated with ansible compatibility information")
+        logging.error(
+            "README.md not updated with ansible compatibility information"
+        )
         sys.exit(1)
     if start and end:
-        data = ANSIBLE_COMPAT.format(requires_ansible=requires_ansible).splitlines()
+        data = ANSIBLE_COMPAT.format(
+            requires_ansible=requires_ansible
+        ).splitlines()
         new = content[0 : start + 1] + data + content[end:]
         with open(readme, "w") as fhand:
             fhand.write("\n".join(new))
-        logging.info("README.md updated with ansible compatibility information")
+        logging.info(
+            "README.md updated with ansible compatibility information"
+        )
 
 
 def main():
@@ -495,7 +536,12 @@ def main():
     if args.link_collection:
         link_collection(path, galaxy)
     content = process(collection=collection, path=path)
-    update_readme(content=content, path=args.path, gh_url=gh_url, branch_name=args.branch_name)
+    update_readme(
+        content=content,
+        path=args.path,
+        gh_url=gh_url,
+        branch_name=args.branch_name,
+    )
     runtime = load_runtime(path=path)
     add_ansible_compatibility(runtime=runtime, path=args.path)
 
