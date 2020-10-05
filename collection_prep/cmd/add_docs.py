@@ -44,10 +44,11 @@ SUBDIRS = (
     "connection",
     "filter",
     "httpapi",
+    "inventory",
     "lookup",
     "netconf",
     "modules",
-    "inventory",
+    "test"
 )
 TEMPLATE_DIR = os.path.dirname(__file__)
 ANSIBLE_COMPAT = """## Ansible version compatibility
@@ -136,7 +137,7 @@ def update_readme(content, path, gh_url, branch_name):
         data.append("Name | Description")
         data.append("--- | ---")
         for plugin, description in sorted(plugins.items()):
-            if plugin_type != "filter":
+            if plugin_type not in ["filter", "test"]:
                 link = "[{plugin}]({gh_url}/blob/{branch_name}/docs/{plugin}_{plugin_type}.rst)".format(
                     branch_name=branch_name, gh_url=re.sub(r"\.git$", "", gh_url), plugin=plugin,
                     plugin_type=plugin_type.replace("modules", "module")
@@ -175,16 +176,31 @@ def update_readme(content, path, gh_url, branch_name):
         logging.info("README.md updated")
 
 
-def handle_filters(collection, fullpath):
-    """ Grab each filter from a filter plugin file and
-    use the def comment if available
+def handle_simple(collection, fullpath, kind):
+    """ Grab each plugin from a plugin file and
+    use the def comment if available. Intended for use
+    with "simple" plugins, like filter or tests
 
     :param collection: The full collection name
     :type collection: str
     :param fullpath: The full path to the filter plugin file
     :type fullpath: str
-    :return: A doc of filter plugins + descriptions
+    :param kind: The kind of plugin, filter or test
+    :type kind: str
+    :return: A dict of plugins + descriptions
     """
+    if kind == "filter":
+        class_name = "FilterModule"
+        map_name = "filter_map"
+        func_name = "filters"
+    elif kind == "test":
+        class_name = "TestModule"
+        map_name = "test_map"
+        func_name = "tests"
+    else:
+        logging.error("Only filter and test are supported simple types")
+        sys.exit(1)
+
 
     plugins = {}
     with open(fullpath) as fhand:
@@ -198,54 +214,54 @@ def handle_filters(collection, fullpath):
     classdef = [
         node
         for node in module.body
-        if isinstance(node, ast.ClassDef) and node.name == "FilterModule"
+        if isinstance(node, ast.ClassDef) and node.name == class_name
     ]
     if not classdef:
         return plugins
 
-    filter_map = next(
+    simple_map = next(
         (
             node
             for node in classdef[0].body
             if isinstance(node, ast.Assign)
             and hasattr(node, "targets")
-            and node.targets[0].id == "filter_map"
+            and node.targets[0].id == map_name
         ),
         None,
     )
 
-    if not filter_map:
-        filter_func = [
+    if not simple_map:
+        simple_func = [
             func
             for func in classdef[0].body
-            if isinstance(func, ast.FunctionDef) and func.name == "filters"
+            if isinstance(func, ast.FunctionDef) and func.name == func_name
         ]
-        if not filter_func:
+        if not simple_func:
             return plugins
 
         # The filter map is either looked up using the filter_map = {} assignment or if return returns a dict literal.
-        filter_map = next(
+        simple_map = next(
             (
                 node
-                for node in filter_func[0].body
+                for node in simple_func[0].body
                 if isinstance(node, ast.Return) and isinstance(node.value, ast.Dict)
             ),
             None,
         )
 
-    if not filter_map:
+    if not simple_map:
         return plugins
 
-    keys = [k.value for k in filter_map.value.keys]
-    logging.info("Adding filter plugins %s", ",".join(keys))
-    values = [k.id for k in filter_map.value.values]
-    filter_map = dict(zip(keys, values))
-    for name, func in filter_map.items():
+    keys = [k.value for k in simple_map.value.keys]
+    logging.info("Adding %s plugins %s", kind, ",".join(keys))
+    values = [k.id for k in simple_map.value.values]
+    simple_map = dict(zip(keys, values))
+    for name, func in simple_map.items():
         if func in function_definitions:
             comment = function_definitions[
                 func
-            ] or "{collection} {name} filter plugin".format(
-                collection=collection, name=name
+            ] or "{collection} {name} {kind} plugin".format(
+                collection=collection, name=name, kind=kind
             )
 
             # Get the first line from the docstring for the description and make that the short description.
@@ -291,8 +307,8 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                 if filename.endswith(".py") and filename not in IGNORE_FILES:
                     fullpath = Path(dirpath, filename)
                     logging.info("Processing %s", fullpath)
-                    if subdir == "filter":
-                        content[subdir].update(handle_filters(collection, fullpath))
+                    if subdir in ["filter", "test"]:
+                        content[subdir].update(handle_simple(collection, fullpath, subdir))
                     else:
                         doc, examples, returndocs, metadata = plugin_docs.get_docstring(
                             fullpath, fragment_loader
