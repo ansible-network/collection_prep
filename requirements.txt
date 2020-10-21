@@ -1,29 +1,30 @@
-ansible==2.9.9
-ansible-base>=0.0.1a2
-appdirs==1.4.4
-astroid==2.4.1
-attrs==19.3.0
-baron==0.9
-black==19.10b0
-cffi==1.14.0
-click==7.1.2
-cryptography==2.9.2
-isort==4.3.21
-Jinja2==2.11.2
-lazy-object-proxy==1.4.3
-MarkupSafe==1.1.1
-mccabe==0.6.1
-pathspec==0.8.0
-pycparser==2.20
-pylint==2.5.2
-PyYAML==5.3.1
-pbr
-redbaron==0.9.2
-regex==2020.5.7
-rply==0.7.7
-ruamel.yaml==0.16.10
-ruamel.yaml.clib==0.2.0
-six==1.14.0
-toml==0.10.0
-typed-ast==1.4.1
-wrapt==1.12.1
+ansible>=2.10
+redbaron
+ruamel.yaml
+# appdirs==1.4.4
+# astroid==2.4.1
+# attrs==19.3.0
+# baron==0.9
+# black==19.10b0
+# cffi==1.14.0
+# click==7.1.2
+# cryptography==2.9.2
+# isort==4.3.21
+# Jinja2==2.11.2
+# lazy-object-proxy==1.4.3
+# MarkupSafe==1.1.1
+# mccabe==0.6.1
+# pathspec==0.8.0
+# pycparser==2.20
+# pylint==2.5.2
+# PyYAML==5.3.1
+# pbr
+# redbaron==0.9.2
+# regex==2020.5.7
+# rply==0.7.7
+# ruamel.yaml==0.16.10
+# ruamel.yaml.clib==0.2.0
+# six==1.14.0
+# toml==0.10.0
+# typed-ast==1.4.1
+# wrapt==1.12.1
