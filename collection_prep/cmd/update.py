@@ -24,6 +24,7 @@ SUBDIRS = (
     "httpapi",
     "netconf",
     "terminal",
+    "inventory",
 )
 SPECIALS = {"ospfv2": "OSPFv2", "interfaces": "Interfaces", "static": "Static"}
 
