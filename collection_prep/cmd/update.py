@@ -10,7 +10,11 @@ import subprocess
 import ruamel.yaml
 
 from argparse import ArgumentParser
-from collection_prep.utils import get_removed_at_date, load_py_as_ast, find_assigment_in_ast
+from collection_prep.utils import (
+    get_removed_at_date,
+    load_py_as_ast,
+    find_assigment_in_ast,
+)
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
@@ -64,7 +68,9 @@ def retrieve_plugin_name(plugin_type, bodypart):
 def update_deprecation_notice(documentation):
     if "deprecated" in documentation:
         logging.info("Updating deprecation notice")
-        documentation["deprecated"].update({"removed_at_date": get_removed_at_date()})
+        documentation["deprecated"].update(
+            {"removed_at_date": get_removed_at_date()}
+        )
         documentation["deprecated"].pop("removed_in", None)
 
 
@@ -87,7 +93,9 @@ def update_documentation(bodypart):
     # remove version added
     documentation.pop("version_added", None)
     desc_idx = [
-        idx for idx, key in enumerate(documentation.keys()) if key == "description"
+        idx
+        for idx, key in enumerate(documentation.keys())
+        if key == "description"
     ]
     # insert version_added after the description
     documentation.insert(desc_idx[0] + 1, key="version_added", value="1.0.0")
@@ -115,7 +123,9 @@ def update_examples(bodypart, module_name, collection):
     full_module_name = "{collection}.{module_name}".format(
         collection=collection, module_name=module_name
     )
-    example = ruamel.yaml.load(bodypart.value.to_python(), ruamel.yaml.RoundTripLoader)
+    example = ruamel.yaml.load(
+        bodypart.value.to_python(), ruamel.yaml.RoundTripLoader
+    )
     # check each task and update to fqcn
     for idx, task in enumerate(example):
         example[idx] = ruamel.yaml.comments.CommentedMap(
@@ -150,7 +160,9 @@ def update_short_description(retrn, documentation, module_name):
     if not retrn:
         logging.warning("Failed to find RETURN assignment")
         return
-    ret_section = ruamel.yaml.load(retrn.value.to_python(), ruamel.yaml.RoundTripLoader)
+    ret_section = ruamel.yaml.load(
+        retrn.value.to_python(), ruamel.yaml.RoundTripLoader
+    )
     if not documentation:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return
@@ -177,14 +189,16 @@ def update_short_description(retrn, documentation, module_name):
                 resource = "".join(chars)
             if len(parts) > 2 and parts[2] != "global":
                 resource += " {p1}".format(p1=parts[2])
-            short_description = "{resource} resource module".format(resource=resource)
+            short_description = "{resource} resource module".format(
+                resource=resource
+            )
     # Check for deprecated modules
-    if "deprecated" in doc_section and not short_description.startswith("(deprecated,"):
+    if "deprecated" in doc_section and not short_description.startswith(
+        "(deprecated,"
+    ):
         logging.info("Found to be deprecated")
         short_description = short_description.replace("(deprecated) ", "")
-        short_description = (
-            f"(deprecated, removed after {get_removed_at_date()}) {short_description}"
-        )
+        short_description = f"(deprecated, removed after {get_removed_at_date()}) {short_description}"
     # Change short if necessary
     if short_description != doc_section["short_description"]:
         logging.info("Setting short desciption to '%s'", short_description)
@@ -228,14 +242,20 @@ def process(collection, path):
                 # Get the module naem from the docstring
                 module_name = retrieve_plugin_name(
                     subdir,
-                    find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION"),
+                    find_assigment_in_ast(
+                        ast_file=ast_obj, name="DOCUMENTATION"
+                    ),
                 )
                 if not module_name:
-                    logging.warning("Skipped %s: No module name found", filename)
+                    logging.warning(
+                        "Skipped %s: No module name found", filename
+                    )
                     continue
 
                 # Remove the metadata
-                remove_assigment_in_ast(ast_file=ast_obj, name="ANSIBLE_METADATA")
+                remove_assigment_in_ast(
+                    ast_file=ast_obj, name="ANSIBLE_METADATA"
+                )
                 logging.info("Removed metadata in %s", filename)
 
                 # Update the documentation
@@ -249,7 +269,9 @@ def process(collection, path):
                 if subdir == "modules":
                     # Update the short description
                     update_short_description(
-                        retrn=find_assigment_in_ast(ast_file=ast_obj, name="RETURN"),
+                        retrn=find_assigment_in_ast(
+                            ast_file=ast_obj, name="RETURN"
+                        ),
                         documentation=find_assigment_in_ast(
                             ast_file=ast_obj, name="DOCUMENTATION"
                         ),

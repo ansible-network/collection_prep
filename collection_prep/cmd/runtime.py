@@ -10,7 +10,11 @@ import glob
 from argparse import ArgumentParser
 
 import ruamel.yaml
-from collection_prep.utils import get_removed_at_date, load_py_as_ast, find_assigment_in_ast
+from collection_prep.utils import (
+    get_removed_at_date,
+    load_py_as_ast,
+    find_assigment_in_ast,
+)
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
@@ -50,7 +54,9 @@ def process_runtime_plugin_routing(collection, path):
         )
 
         ast_obj = load_py_as_ast(fullpath)
-        documentation = find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION")
+        documentation = find_assigment_in_ast(
+            ast_file=ast_obj, name="DOCUMENTATION"
+        )
         doc_section = ruamel.yaml.load(
             documentation.value.to_python(), ruamel.yaml.RoundTripLoader
         )
@@ -67,7 +73,9 @@ def process_runtime_plugin_routing(collection, path):
         # by design will invoke action plugin first.
         if not os.path.exists(os.path.join(action_path, f"{module_name}.py")):
             if (
-                os.path.exists(os.path.join(action_path, f"{module_prefix}.py"))
+                os.path.exists(
+                    os.path.join(action_path, f"{module_prefix}.py")
+                )
                 and module_prefix == collection_name
             ):
                 fq_action_name = f"{collection}.{module_prefix}"
@@ -88,7 +96,9 @@ def process_runtime_plugin_routing(collection, path):
             fq_module_name = f"{collection}.{module_name}"
             if not plugin_routing.get("modules"):
                 plugin_routing["modules"] = {}
-            plugin_routing["modules"].update({short_name: {"redirect": fq_module_name}})
+            plugin_routing["modules"].update(
+                {short_name: {"redirect": fq_module_name}}
+            )
 
         # handle module deprecation notice
         if "deprecated" in doc_section:
@@ -133,7 +143,7 @@ def process(collection, path):
 
     supported_ansible_versions = COLLECTION_MIN_ANSIBLE_VERSION
     if COLLECTION_MAX_ANSIBLE_VERSION:
-        supported_ansible_versions += ',' + COLLECTION_MAX_ANSIBLE_VERSION
+        supported_ansible_versions += "," + COLLECTION_MAX_ANSIBLE_VERSION
     rt_obj["requires_ansible"] = supported_ansible_versions
     plugin_routing = process_runtime_plugin_routing(collection, path)
     if plugin_routing:

@@ -20,7 +20,6 @@ _CONST = re.compile(r"C\(([^)]+)\)")
 _RULER = re.compile(r"HORIZONTALLINE")
 
 
-
 def to_kludge_ns(key, value):
     NS_MAP[key] = value
     return ""
@@ -30,10 +29,8 @@ def from_kludge_ns(key):
     return NS_MAP[key]
 
 
-
-
 def html_ify(text):
-    ''' convert symbols like I(this is in italics) to valid HTML '''
+    """ convert symbols like I(this is in italics) to valid HTML """
 
     if not isinstance(text, string_types):
         text = to_text(text)
@@ -49,8 +46,9 @@ def html_ify(text):
 
     return t.strip()
 
+
 def rst_ify(text):
-    ''' convert symbols like I(this is in italics) to valid restructured text '''
+    """ convert symbols like I(this is in italics) to valid restructured text """
 
     try:
         t = _ITALIC.sub(r"*\1*", text)
@@ -66,18 +64,17 @@ def rst_ify(text):
     return t
 
 
-
 def documented_type(text):
-    ''' Convert any python type to a type for documentation '''
+    """ Convert any python type to a type for documentation """
 
     if isinstance(text, Undefined):
-        return '-'
-    if text == 'str':
-        return 'string'
-    if text == 'bool':
-        return 'boolean'
-    if text == 'int':
-        return 'integer'
-    if text == 'dict':
-        return 'dictionary'
+        return "-"
+    if text == "str":
+        return "string"
+    if text == "bool":
+        return "boolean"
+    if text == "int":
+        return "integer"
+    if text == "dict":
+        return "dictionary"
     return text
