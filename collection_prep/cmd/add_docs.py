@@ -62,7 +62,7 @@ PEP440 is the schema used to describe the versions of Ansible.
 
 
 def ensure_list(value):
-    """ Ensure the value is a list
+    """Ensure the value is a list
 
     :param value: The value to check
     :type value: Unknown
@@ -74,7 +74,7 @@ def ensure_list(value):
 
 
 def convert_descriptions(data):
-    """ Convert the descriptions for doc into lists
+    """Convert the descriptions for doc into lists
 
     :param data: the chunk from the doc
     :type data: dict
@@ -92,7 +92,7 @@ def convert_descriptions(data):
 
 
 def jinja_environment():
-    """ Define the jinja environment
+    """Define the jinja environment
 
     :return: A jinja template, with the env set
     """
@@ -114,7 +114,7 @@ def jinja_environment():
 
 
 def update_readme(content, path, gh_url, branch_name):
-    """ Update the README.md in the repository
+    """Update the README.md in the repository
 
     :param content: The dict containing the content
     :type content: dict
@@ -140,8 +140,8 @@ def update_readme(content, path, gh_url, branch_name):
             )
         data.append("Name | Description")
         data.append("--- | ---")
-        for plugin, description in sorted(plugins.items()):
-            if plugin_type not in ["filter", "test"]:
+        for plugin, info in sorted(plugins.items()):
+            if info["has_rst"]:
                 link = "[{plugin}]({gh_url}/blob/{branch_name}/docs/{plugin}_{plugin_type}.rst)".format(
                     branch_name=branch_name,
                     gh_url=re.sub(r"\.git$", "", gh_url),
@@ -153,7 +153,7 @@ def update_readme(content, path, gh_url, branch_name):
             data.append(
                 "{link}|{description}".format(
                     link=link,
-                    description=description.replace("|", "\\|").strip(),
+                    description=info["comment"].replace("|", "\\|").strip(),
                 )
             )
         data.append("")
@@ -184,7 +184,7 @@ def update_readme(content, path, gh_url, branch_name):
 
 
 def handle_simple(collection, fullpath, kind):
-    """ Grab each plugin from a plugin file and
+    """Grab each plugin from a plugin file and
     use the def comment if available. Intended for use
     with "simple" plugins, like filter or tests
 
@@ -277,7 +277,7 @@ def handle_simple(collection, fullpath, kind):
             )
             plugins[
                 "{collection}.{name}".format(collection=collection, name=name)
-            ] = comment
+            ] = {"has_rst": False, "comment": comment}
     return plugins
 
 
@@ -314,20 +314,17 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                 if filename.endswith(".py") and filename not in IGNORE_FILES:
                     fullpath = Path(dirpath, filename)
                     logging.info("Processing %s", fullpath)
-                    if subdir in ["filter", "test"]:
+                    (
+                        doc,
+                        examples,
+                        returndocs,
+                        metadata,
+                    ) = plugin_docs.get_docstring(fullpath, fragment_loader)
+                    if doc is None and subdir in ["filter", "test"]:
                         content[subdir].update(
                             handle_simple(collection, fullpath, subdir)
                         )
                     else:
-                        (
-                            doc,
-                            examples,
-                            returndocs,
-                            metadata,
-                        ) = plugin_docs.get_docstring(
-                            fullpath, fragment_loader
-                        )
-
                         if doc:
                             doc["plugin_type"] = plugin_type
 
@@ -374,14 +371,15 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
 
                             with open(module_rst_path, "w") as fd:
                                 fd.write(template.render(doc))
-                            content[subdir][doc["module"]] = doc[
-                                "short_description"
-                            ]
+                            content[subdir][doc["module"]] = {
+                                "has_rst": True,
+                                "comment": doc["short_description"],
+                            }
     return content
 
 
 def load_galaxy(path):
-    """ Load collection details from the galaxy.yml file in the collection
+    """Load collection details from the galaxy.yml file in the collection
 
     :param path: The path the collection
     :return: The collection name and gh url
@@ -399,7 +397,7 @@ def load_galaxy(path):
 
 
 def load_runtime(path):
-    """ Load runtime details from the runtime.yml file in the collection
+    """Load runtime details from the runtime.yml file in the collection
 
     :param path: The path the collection
     :return: The runtime dict
@@ -417,7 +415,7 @@ def load_runtime(path):
 
 
 def link_collection(path, galaxy):
-    """ Link the provided collection into the Ansible default collection path
+    """Link the provided collection into the Ansible default collection path
 
     :param path: A path
     :type path: str
@@ -454,7 +452,7 @@ def link_collection(path, galaxy):
 
 
 def add_ansible_compatibility(runtime, path):
-    """ Add ansible compatibility information to README
+    """Add ansible compatibility information to README
 
     :param runtime: runtime.yml contents
     :type runtime: dict
