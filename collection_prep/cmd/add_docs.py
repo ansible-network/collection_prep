@@ -49,6 +49,7 @@ SUBDIRS = (
     "netconf",
     "modules",
     "test",
+    "validate"
 )
 TEMPLATE_DIR = os.path.dirname(__file__)
 ANSIBLE_COMPAT = """## Ansible version compatibility
