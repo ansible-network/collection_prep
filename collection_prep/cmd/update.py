@@ -29,6 +29,8 @@ SUBDIRS = (
     "netconf",
     "terminal",
     "inventory",
+    "cli_parses",
+    "fact_diff"
 )
 SPECIALS = {"ospfv2": "OSPFv2", "interfaces": "Interfaces", "static": "Static"}
 
