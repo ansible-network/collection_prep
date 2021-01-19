@@ -1,0 +1,10 @@
+---
+- id: update-docs
+  name: Update documentation
+  description: This hook runs the collection_prep_add_docs script
+  entry: collection_prep_add_docs
+  language: python
+  files: "plugins/"
+  types: [python]
+  pass_filenames: false
+  args: ["-p", "."]
