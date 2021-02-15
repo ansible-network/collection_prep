@@ -1,4 +1,4 @@
-# 1.0.0 prep engine
+# Collection Prep Engine
 
 
 ## INSTALLATION
@@ -113,7 +113,7 @@ INFO      Processing 'connection' for README
 INFO      Processing 'filter' for README
 INFO      Processing 'modules' for README
 INFO      README.md updated
-(venv) ➜  collection_update git:(master) ✗ 
+(venv) ➜  collection_update git:(master) ✗
 ```
 
 ## meta/runtime.yml GENERATOR
