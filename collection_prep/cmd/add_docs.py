@@ -49,7 +49,7 @@ SUBDIRS = (
     "netconf",
     "modules",
     "test",
-    "validate"
+    "validate",
 )
 TEMPLATE_DIR = os.path.dirname(__file__)
 ANSIBLE_COMPAT = """## Ansible version compatibility
@@ -131,6 +131,8 @@ def update_readme(content, path, gh_url, branch_name):
     data = []
     for plugin_type, plugins in content.items():
         logging.info("Processing '%s' for README", plugin_type)
+        if not plugins:
+            continue
         if plugin_type == "modules":
             data.append("### Modules")
         else:
@@ -139,6 +141,8 @@ def update_readme(content, path, gh_url, branch_name):
                     plugin_type=plugin_type.capitalize()
                 )
             )
+            if "_description" in plugins:
+                data.append(plugins.pop("_description"))
         data.append("Name | Description")
         data.append("--- | ---")
         for plugin, info in sorted(plugins.items()):
@@ -169,7 +173,7 @@ def update_readme(content, path, gh_url, branch_name):
     try:
         start = content.index("<!--start collection content-->")
         end = content.index("<!--end collection content-->")
-    except ValueError as _err:
+    except ValueError:
         logging.error("Content anchors not found in %s", readme)
         logging.error("README.md not updated")
         sys.exit(1)
@@ -225,6 +229,8 @@ def handle_simple(collection, fullpath, kind):
     ]
     if not classdef:
         return plugins
+    else:
+        plugins["_description"] = ast.get_docstring(classdef[0], clean=True)
 
     simple_map = next(
         (
@@ -322,8 +328,9 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                         metadata,
                     ) = plugin_docs.get_docstring(fullpath, fragment_loader)
                     if doc is None and subdir in ["filter", "test"]:
-                        content[subdir].update(
-                            handle_simple(collection, fullpath, subdir)
+                        combined_ptype = "%s %s" % (filename, subdir)
+                        content[combined_ptype] = handle_simple(
+                            collection, fullpath, subdir
                         )
                     else:
                         if doc:
