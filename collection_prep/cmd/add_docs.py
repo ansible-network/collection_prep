@@ -328,7 +328,8 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                         metadata,
                     ) = plugin_docs.get_docstring(fullpath, fragment_loader)
                     if doc is None and subdir in ["filter", "test"]:
-                        combined_ptype = "%s %s" % (filename, subdir)
+                        name_only = filename.rsplit(".")[0]
+                        combined_ptype = "%s %s" % (name_only, subdir)
                         content[combined_ptype] = handle_simple(
                             collection, fullpath, subdir
                         )
