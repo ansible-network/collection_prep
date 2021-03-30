@@ -231,9 +231,9 @@ def handle_simple(collection, fullpath, kind):
     if not classdef:
         return plugins
     else:
-        plugins["_description"] = ast.get_docstring(
-            classdef[0], clean=True
-        ).strip()
+        docstring = ast.get_docstring(classdef[0], clean=True).strip()
+        if docstring:
+            plugins["_description"] = docstring
 
     simple_map = next(
         (
