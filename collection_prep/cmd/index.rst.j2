@@ -1,0 +1,36 @@
+
+.. _plugins_in_@{galaxy['namespace']}@.@{galaxy['name']}@:
+
+
+@{galaxy['namespace'].capitalize()}@.@{galaxy['name'].capitalize()}@
+@{ "=" * (galaxy['namespace']|length + galaxy['name']|length +1)}@
+
+Collection version @{galaxy.get('version', version)}@
+
+.. toctree::
+    :maxdepth: 1
+
+Plugin Index
+------------
+
+These are the plugins in the @{galaxy['namespace']}@.@{galaxy['name']}@ collection
+
+
+Modules
+~~~~~~~
+
+{% for m in modules %}
+* :ref:`@{m.split('.')[1]}@ <ansible_collections.@{m}@>` -- @{modules[m]["comment"]}@
+{% endfor %}
+
+.. seealso::
+
+    List of :ref:`collections <list_of_collections>` with docs hosted here.
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+
+{% for m in modules %}
+    @{m}@
+{% endfor %}

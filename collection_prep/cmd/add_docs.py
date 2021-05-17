@@ -92,7 +92,7 @@ def convert_descriptions(data):
                 convert_descriptions(definition["contains"])
 
 
-def jinja_environment():
+def jinja_environment(tpl_name):
     """Define the jinja environment
 
     :return: A jinja template, with the env set
@@ -110,7 +110,7 @@ def jinja_environment():
     env.filters["html_ify"] = html_ify
     env.globals["to_kludge_ns"] = to_kludge_ns
     env.globals["from_kludge_ns"] = from_kludge_ns
-    template = env.get_template("plugin.rst.j2")
+    template = env.get_template(tpl_name)
     return template
 
 
@@ -300,7 +300,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
     :param path: The path to the collection
     :type path: str
     """
-    template = jinja_environment()
+    template = jinja_environment("plugin.rst.j2")
     docs_path = Path(path, "docs")
     if docs_path.is_dir():
         logging.info("Purging content from directory %s", docs_path)
@@ -389,6 +389,11 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
                             }
     return content
 
+
+def generate_index_rst(path, content, galaxy, version):
+    template = jinja_environment("index.rst.j2")
+    index_path = Path(path, "docs") / "index.rst"
+    index_path.write_text(template.render(content, galaxy=galaxy, version=version))
 
 def load_galaxy(path):
     """Load collection details from the galaxy.yml file in the collection
@@ -530,6 +535,11 @@ def main():
         default=False,
         help="Link the collection in ~/.ansible/collections",
     )
+    parser.add_argument(
+        "--version",
+        help="Overwrite the version from galaxy.yaml",
+        required=False,
+    )
 
     if argcomplete:
         argcomplete.autocomplete(parser)
@@ -546,6 +556,7 @@ def main():
     if args.link_collection:
         link_collection(path, galaxy)
     content = process(collection=collection, path=path)
+    generate_index_rst(path, content, galaxy, args.version)
     update_readme(
         content=content,
         path=args.path,
