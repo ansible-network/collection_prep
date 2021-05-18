@@ -151,10 +151,10 @@ Parameters
                                 {% endif %}
                             {% endfor %}
                         </ul>
-                    {% endif %}
-                    {# Show default value, when multiple choice or no choices #}
-                    {% if value.default is defined and value.default not in value.choices %}
+                        {# Show default value, when multiple choice or no choices #}
+                        {% if value.default is defined and value.default not in value.choices %}
                         <b>Default:</b><br/><div style="color: blue">@{ value.default | tojson | escape }@</div>
+                        {% endif %}
                     {% endif %}
                 </td>
                 {# configuration #}
