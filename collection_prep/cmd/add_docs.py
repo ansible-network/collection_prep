@@ -269,7 +269,7 @@ def handle_simple(collection, fullpath, kind):
     if not simple_map:
         return plugins
 
-    keys = [k.value for k in simple_map.value.keys]
+    keys = [k.s for k in simple_map.value.keys]
     logging.info("Adding %s plugins %s", kind, ",".join(keys))
     values = [k.id for k in simple_map.value.values]
     simple_map = dict(zip(keys, values))
