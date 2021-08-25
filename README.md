@@ -40,7 +40,7 @@ This is intended to operate against the repository clone.
 
 This will generate an RST file for each plugin in the collection docs folder and add a table of links for all plugin types in the README.md
 
-This will also pull the rewuires_ansible information from the runtime.yml file and add an ansible compatibility section to the README.
+This will also pull the requires_ansible information from the runtime.yml file and add an ansible compatibility section to the README.
 
 For the ansible compatibility, ensure the collection README.md has the following in it:
 ```
