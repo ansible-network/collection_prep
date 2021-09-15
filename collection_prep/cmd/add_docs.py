@@ -303,7 +303,7 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
     template = jinja_environment()
     docs_path = Path(path, "docs")
     if docs_path.is_dir():
-        logging.info("Purging existning rst files from directory %s", docs_path)
+        logging.info("Purging existing rst files from directory %s", docs_path)
         for entry in docs_path.glob("*.rst"):
             entry.unlink()
     logging.info("Making docs directory %s", docs_path)
