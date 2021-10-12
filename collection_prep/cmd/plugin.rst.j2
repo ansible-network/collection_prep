@@ -421,7 +421,11 @@ Status
 
 {% if deprecated %}
 
-- This @{ plugin_type }@ will be removed in version @{ deprecated['removed_in'] | default('') | string | rst_ify }@. *[deprecated]*
+{% if 'removed_in' in deprecated %}
+- This @{ plugin_type }@ will be removed in version @{ deprecated['removed_in'] | string | rst_ify }@. *[deprecated]*
+{% elif 'removed_at_date' in deprecated %}
+- This @{ plugin_type }@ will be removed in a release after @{ deprecated['removed_at_date'] | string | rst_ify }@. *[deprecated]*
+{% endif %}
 - For more information see `DEPRECATED`_.
 
 {% endif %}
