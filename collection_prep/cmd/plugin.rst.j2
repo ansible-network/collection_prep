@@ -379,7 +379,9 @@ Common return values are documented `here <https://docs.ansible.com/ansible/late
                        / <span style="color: purple">elements=@{ value.elements | documented_type }@</span>
                       {% endif %}
                     </div>
-                    {% if value.version_added %}<div style="font-style: italic; font-size: small; color: darkgreen">added in @{value.version_added}@</div>{% endif %}
+                    {% if value.version_added %}
+                    <div style="font-style: italic; font-size: small; color: darkgreen">added in @{value.version_added}@</div>
+                    {% endif %}
                 </td>
                 <td>@{ value.returned | html_ify }@</td>
                 <td>
