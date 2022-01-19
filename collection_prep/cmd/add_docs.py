@@ -18,6 +18,9 @@ from ansible.module_utils.common.collections import is_sequence
 from ansible.module_utils.six import string_types
 from ansible.plugins.loader import fragment_loader
 from ansible.utils import plugin_docs
+from ansible.utils.collection_loader._collection_finder import (
+    _AnsibleCollectionFinder,
+)
 from jinja2 import Environment, FileSystemLoader
 
 from collection_prep.jinja_utils import (
@@ -293,7 +296,9 @@ def handle_simple(collection, fullpath, kind):
     return plugins
 
 
-def process(collection, path):  # pylint: disable-msg=too-many-locals
+def process(
+    collection: str, path: Path
+):  # pylint: disable-msg=too-many-locals
     """
     Process the files in each subdirectory
 
@@ -302,6 +307,18 @@ def process(collection, path):  # pylint: disable-msg=too-many-locals
     :param path: The path to the collection
     :type path: str
     """
+    # Add path to collections dir so we can find local doc_fragments
+    collections_path = path.parents[1]
+    # Should now point to ansible_collections dir
+    if collections_path.name != "ansible_collections":
+        raise Exception(
+            f"{collections_path} doesn't look enough like a collection"
+        )
+    # Tell ansible about the path
+    _AnsibleCollectionFinder(
+        paths=[collections_path, "~/.ansible/collections"]
+    )._install()
+
     template = jinja_environment()
     docs_path = Path(path, "docs")
     if docs_path.is_dir():
