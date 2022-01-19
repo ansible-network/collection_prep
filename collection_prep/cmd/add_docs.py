@@ -530,7 +530,7 @@ def main():
     parser.add_argument(
         "--link-collection",
         dest="link_collection",
-        default=False,
+        action="store_true",
         help="Link the collection in ~/.ansible/collections",
     )
 
