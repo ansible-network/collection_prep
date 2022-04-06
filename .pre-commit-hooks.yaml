@@ -8,3 +8,11 @@
   types: [python]
   pass_filenames: false
   args: ["-p", "."]
+
+- id: dev-version
+  name: Set version
+  description: Set galaxy.yaml version to a PEP 440-compliant dev version
+  entry: collection_prep_set_version
+  language: python
+  pass_filenames: false
+  args: ["-p", "."]
