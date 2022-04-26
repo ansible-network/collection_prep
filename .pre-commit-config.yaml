@@ -9,6 +9,13 @@ repos:
       - id: end-of-file-fixer
       - id: no-commit-to-branch
       - id: trailing-whitespace
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--filter-files"]
+
   - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:

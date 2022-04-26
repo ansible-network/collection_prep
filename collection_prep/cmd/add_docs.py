@@ -13,19 +13,19 @@ from argparse import ArgumentParser
 from functools import partial
 from pathlib import Path
 
-
 import yaml
 from ansible.module_utils.common.collections import is_sequence
-from ansible.utils import plugin_docs
-from ansible.plugins.loader import fragment_loader
 from ansible.module_utils.six import string_types
+from ansible.plugins.loader import fragment_loader
+from ansible.utils import plugin_docs
 from jinja2 import Environment, FileSystemLoader
+
 from collection_prep.jinja_utils import (
-    to_kludge_ns,
+    documented_type,
     from_kludge_ns,
     html_ify,
     rst_ify,
-    documented_type,
+    to_kludge_ns,
 )
 
 try:
