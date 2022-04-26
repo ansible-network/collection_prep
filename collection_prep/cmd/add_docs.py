@@ -9,9 +9,11 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 from argparse import ArgumentParser
 from functools import partial
 from pathlib import Path
+from typing import Optional
 
 import yaml
 from ansible.module_utils.common.collections import is_sequence
@@ -307,18 +309,6 @@ def process(
     :param path: The path to the collection
     :type path: str
     """
-    # Add path to collections dir so we can find local doc_fragments
-    collections_path = path.parents[1]
-    # Should now point to ansible_collections dir
-    if collections_path.name != "ansible_collections":
-        raise Exception(
-            f"{collections_path} doesn't look enough like a collection"
-        )
-    # Tell ansible about the path
-    _AnsibleCollectionFinder(
-        paths=[collections_path, "~/.ansible/collections"]
-    )._install()
-
     template = jinja_environment()
     docs_path = Path(path, "docs")
     if docs_path.is_dir():
@@ -446,7 +436,9 @@ def load_runtime(path):
         sys.exit(1)
 
 
-def link_collection(path, galaxy):
+def link_collection(
+    path: Path, galaxy: dict, collection_root: Optional[Path] = None
+):
     """Link the provided collection into the Ansible default collection path
 
     :param path: A path
@@ -455,13 +447,15 @@ def link_collection(path, galaxy):
     :type galaxy: dict
     """
 
-    collection_root = Path(
-        Path.home(), ".ansible/collections/ansible_collections"
-    )
+    if collection_root is None:
+        collection_root = Path(
+            Path.home(), ".ansible/collections/ansible_collections"
+        )
+
     namespace_directory = Path(collection_root, galaxy["namespace"])
     collection_directory = Path(namespace_directory, galaxy["name"])
 
-    logging.info("Linking collection to user collection directory")
+    logging.info("Linking collection to collection path %s", collection_root)
     logging.info(
         "This is required for the Ansible fragment loader to find doc fragments"
     )
@@ -481,6 +475,44 @@ def link_collection(path, galaxy):
 
     logging.info("Linking collection %s -> %s", path, collection_directory)
     collection_directory.symlink_to(path)
+
+
+def add_collection(
+    path: Path, galaxy: dict
+) -> Optional[tempfile.TemporaryDirectory]:
+    """Add path to collections dir so we can find local doc_fragments"""
+    collections_path = None
+    tempdir = None
+
+    try:
+        collections_path = path.parents[1]
+    except IndexError:
+        pass
+
+    # Check that parent dir is named ansible_collections
+    if collections_path and collections_path.name != "ansible_collections":
+        logging.info(
+            "%s doesn't look enough like a collection", collections_path
+        )
+        collections_path = None
+
+    if collections_path is None:
+        tempdir = tempfile.TemporaryDirectory()
+        logging.info("Temporary collection path %s created", tempdir.name)
+        collections_path = Path(tempdir.name) / "ansible_collections"
+        link_collection(path, galaxy, collection_root=collections_path)
+
+    full_path = collections_path / galaxy["namespace"] / galaxy["name"]
+    logging.info("Collection path is %s", full_path)
+
+    # Tell ansible about the path
+    _AnsibleCollectionFinder(
+        paths=[collections_path, "~/.ansible/collections"]
+    )._install()
+
+    # This object has to outlive this method or it will be cleaned up before
+    # we can use it
+    return tempdir
 
 
 def add_ansible_compatibility(runtime, path):
@@ -547,7 +579,7 @@ def main():
     parser.add_argument(
         "--link-collection",
         dest="link_collection",
-        default=False,
+        action="store_true",
         help="Link the collection in ~/.ansible/collections",
     )
 
@@ -563,9 +595,16 @@ def main():
     logging.info("Setting collection name to %s", collection)
     gh_url = galaxy["repository"]
     logging.info("Setting GitHub repository url to %s", gh_url)
+
+    tempdir = None
     if args.link_collection:
         link_collection(path, galaxy)
+    else:
+        tempdir = add_collection(path, galaxy)
     content = process(collection=collection, path=path)
+    if tempdir is not None:
+        tempdir.cleanup()
+
     update_readme(
         content=content,
         path=args.path,
