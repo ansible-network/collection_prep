@@ -2,18 +2,19 @@
 Get ready for 1.0.0
 """
 import logging
-import platform
 import os
+import platform
 import re
-import sys
 import subprocess
+import sys
+from argparse import ArgumentParser
+
 import ruamel.yaml
 
-from argparse import ArgumentParser
 from collection_prep.utils import (
+    find_assigment_in_ast,
     get_removed_at_date,
     load_py_as_ast,
-    find_assigment_in_ast,
 )
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)

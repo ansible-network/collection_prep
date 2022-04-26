@@ -1,13 +1,10 @@
 import re
-
 from html import escape as html_escape
 
 from ansible.errors import AnsibleError
-from ansible.module_utils.six import string_types
 from ansible.module_utils._text import to_text
-
+from ansible.module_utils.six import string_types
 from jinja2.runtime import Undefined
-
 
 NS_MAP = {}
 
@@ -30,7 +27,7 @@ def from_kludge_ns(key):
 
 
 def html_ify(text):
-    """ convert symbols like I(this is in italics) to valid HTML """
+    """convert symbols like I(this is in italics) to valid HTML"""
 
     if not isinstance(text, string_types):
         text = to_text(text)
@@ -48,7 +45,7 @@ def html_ify(text):
 
 
 def rst_ify(text):
-    """ convert symbols like I(this is in italics) to valid restructured text """
+    """convert symbols like I(this is in italics) to valid restructured text"""
 
     try:
         t = _ITALIC.sub(r"*\1*", text)
@@ -65,7 +62,7 @@ def rst_ify(text):
 
 
 def documented_type(text):
-    """ Convert any python type to a type for documentation """
+    """Convert any python type to a type for documentation"""
 
     if isinstance(text, Undefined):
         return "-"
