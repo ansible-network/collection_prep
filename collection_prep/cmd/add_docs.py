@@ -339,7 +339,7 @@ def process(
                         examples,
                         returndocs,
                         metadata,
-                    ) = plugin_docs.get_docstring(fullpath, fragment_loader)
+                    ) = plugin_docs.get_docstring(str(fullpath), fragment_loader)
                     if doc is None and subdir in ["filter", "test"]:
                         name_only = filename.rsplit(".")[0]
                         combined_ptype = "%s %s" % (name_only, subdir)
