@@ -332,7 +332,7 @@ def process(
             logging.info("Process content in %s", dirpath)
             for filename in os.listdir(dirpath):
                 if filename.endswith(".py") and filename not in IGNORE_FILES:
-                    fullpath = Path(dirpath, filename)
+                    fullpath = str(Path(dirpath, filename))
                     logging.info("Processing %s", fullpath)
                     (
                         doc,
