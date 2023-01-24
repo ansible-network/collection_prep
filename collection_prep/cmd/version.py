@@ -2,10 +2,13 @@ from argparse import ArgumentParser
 import logging
 from pathlib import Path
 import sys
-import subprocess
 
 import ruamel.yaml
 yaml = ruamel.yaml.YAML()
+# Preserve document layout
+yaml.block_seq_indent = 2
+yaml.explicit_start = True
+yaml.preserve_quotes = True
 
 try:
     import argcomplete
