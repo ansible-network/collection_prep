@@ -35,6 +35,12 @@ RULES = {
 }
 
 
+def get_last_version(path) -> str:
+    changelog_path = path / "changelogs" / "changelog.yaml"
+    changelog = yaml.load(changelog_path)
+    return max(changelog["releases"].keys())
+
+
 def update_version(path: Path, version: str) -> str:
     version_parts = [int(v) for v in version.split(".")]
     fragment_path = path / "changelogs" / "fragments"
@@ -96,11 +102,7 @@ def main() -> None:
     args = parser.parse_args()
     path = Path(args.path).absolute()
 
-    version = subprocess.run(
-        ["git", "describe", "--tags", "--abbrev=0"],
-        cwd=path,
-        capture_output=True,
-    ).stdout.decode()
+    version = get_last_version(path)
     logging.info("Detected collection version is %s", version)
 
     new_version = update_version(path, version)
