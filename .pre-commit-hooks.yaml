@@ -1,4 +1,14 @@
 ---
+- id: autoversion
+  name: Update galaxy.yml version
+  description: This hook updates galaxy.yml to have the assumed correct version
+  entry: collection_prep_version
+  language: python
+  files: "plugins/"
+  types: [python]
+  pass_filenames: false
+  args: ["-p", "."]
+
 - id: update-docs
   name: Update documentation
   description: This hook runs the collection_prep_add_docs script
