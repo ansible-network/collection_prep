@@ -40,7 +40,7 @@ RULES = {
 
 def get_last_version(path) -> str:
     changelog_path = path / "changelogs" / "changelog.yaml"
-    if not changelog_path.exists:
+    if not changelog_path.exists():
         # Collection has not been released?
         return "0.0.0"
     changelog = yaml.load(changelog_path)
