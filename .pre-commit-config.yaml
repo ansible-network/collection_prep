@@ -43,6 +43,11 @@ repos:
       - id: no-commit-to-branch
       - id: trailing-whitespace
 
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.4
+    hooks:
+      - id: codespell
+
   - repo: https://github.com/terrencepreilly/darglint
     rev: v1.8.1
     hooks:
