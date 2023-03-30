@@ -35,7 +35,7 @@ def load_py_as_ast(path):
     :param path: The full path to the file
     :return: The ast object
     """
-    with open(path) as file:
+    with open(path, encoding="utf8") as file:
         data = file.read()
         red = RedBaron(data)
     return red

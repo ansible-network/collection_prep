@@ -48,16 +48,16 @@ def html_ify(text):
     if not isinstance(text, string_types):
         text = to_text(text)
 
-    t = html_escape(text)
-    t = _ITALIC.sub(r"<em>\1</em>", t)
-    t = _BOLD.sub(r"<b>\1</b>", t)
-    t = _MODULE.sub(r"<span class='module'>\1</span>", t)
-    t = _URL.sub(r"<a href='\1'>\1</a>", t)
-    t = _LINK.sub(r"<a href='\2'>\1</a>", t)
-    t = _CONST.sub(r"<code>\1</code>", t)
-    t = _RULER.sub(r"<hr/>", t)
+    text = html_escape(text)
+    text = _ITALIC.sub(r"<em>\1</em>", text)
+    text = _BOLD.sub(r"<b>\1</b>", text)
+    text = _MODULE.sub(r"<span class='module'>\1</span>", text)
+    text = _URL.sub(r"<a href='\1'>\1</a>", text)
+    text = _LINK.sub(r"<a href='\2'>\1</a>", text)
+    text = _CONST.sub(r"<code>\1</code>", text)
+    text = _RULER.sub(r"<hr/>", text)
 
-    return t.strip()
+    return text.strip()
 
 
 def rst_ify(text):
@@ -66,15 +66,15 @@ def rst_ify(text):
     :param text: The text to transform
     :return: An RST string of the formatted text
     """
-    t = _ITALIC.sub(r"*\1*", text)
-    t = _BOLD.sub(r"**\1**", t)
-    t = _MODULE.sub(r":ref:`\1 <\1_module>`", t)
-    t = _LINK.sub(r"`\1 <\2>`_", t)
-    t = _URL.sub(r"\1", t)
-    t = _CONST.sub(r"``\1``", t)
-    t = _RULER.sub(r"------------", t)
+    text = _ITALIC.sub(r"*\1*", text)
+    text = _BOLD.sub(r"**\1**", text)
+    text = _MODULE.sub(r":ref:`\1 <\1_module>`", text)
+    text = _LINK.sub(r"`\1 <\2>`_", text)
+    text = _URL.sub(r"\1", text)
+    text = _CONST.sub(r"``\1``", text)
+    text = _RULER.sub(r"------------", text)
 
-    return t
+    return text
 
 
 def documented_type(text):

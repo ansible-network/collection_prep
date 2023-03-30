@@ -60,3 +60,13 @@ repos:
     rev: v1.8.1
     hooks:
       - id: darglint
+
+  - repo: https://github.com/pycqa/pylint
+    rev: v2.17.1
+    hooks:
+      - id: pylint
+        additional_dependencies:
+          - ansible-core
+          - pyyaml
+          - redbaron
+          - ruamel.yaml

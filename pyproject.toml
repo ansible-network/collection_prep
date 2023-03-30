@@ -1,6 +1,21 @@
 [tool.black]
 line-length = 100
 
+[tool.pylint]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint.master]
+no-docstring-rgx = "__.*__"
+
+[tool.pylint.messages_control]
+disable = ["duplicate-code", "fixme"]
+enable = [
+  "useless-suppression", # Identify unneeded pylint disable statements
+
+]
+
 [tool.ruff]
 line-length = 100
 select = [

@@ -29,7 +29,9 @@ def get_warning_msg():
     return "See the plugin documentation for more details"
 
 
-def process_runtime_plugin_routing(collection, path):
+def process_runtime_plugin_routing(
+    collection, path
+):  # pylint: disable-msg=too-many-locals,too-many-branches
     """Process collection plugins to generate a plugin routing map.
 
     :param collection: The name of the collection
@@ -44,7 +46,7 @@ def process_runtime_plugin_routing(collection, path):
     collection = collection.replace("/", ".")
     collection_name = collection.split(".")[-1]
     if not collection_name:
-        logging.error(f"failed to get collection name from {collection}")
+        logging.error("failed to get collection name from %s", collection)
 
     for fullpath in sorted(glob.glob(f"{modules_path}/*.py")):
         filename = fullpath.split("/")[-1]
@@ -53,7 +55,7 @@ def process_runtime_plugin_routing(collection, path):
 
         module_name = filename.split(".")[0]
 
-        logging.info(f"-------------------Processing runtime.yml for module {module_name}")
+        logging.info("-------------------Processing runtime.yml for module %s", module_name)
 
         ast_obj = load_py_as_ast(fullpath)
         documentation = find_assignment_in_ast(ast_file=ast_obj, name="DOCUMENTATION")
@@ -130,7 +132,7 @@ def process(collection, path):
     rt_obj = {}
     collection_path = os.path.join(path, collection)
     if not os.path.exists(collection_path):
-        logging.error(f"{collection_path} does not exit")
+        logging.error("%s does not exist", collection_path)
 
     supported_ansible_versions = COLLECTION_MIN_ANSIBLE_VERSION
     if COLLECTION_MAX_ANSIBLE_VERSION:
@@ -150,8 +152,8 @@ def process(collection, path):
     yaml = ruamel.yaml.YAML()
     yaml.explicit_start = True
 
-    with open(runtime_path, "w") as fp:
-        yaml.dump(rt_obj, fp)
+    with open(runtime_path, "w", encoding="utf8") as file_obj:
+        yaml.dump(rt_obj, file_obj)
 
 
 def main():

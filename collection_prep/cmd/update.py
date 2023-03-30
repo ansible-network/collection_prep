@@ -109,9 +109,7 @@ def update_examples(body_part, module_name, collection):
     if not body_part:
         logging.warning("Failed to find EXAMPLES assignment")
         return
-    full_module_name = "{collection}.{module_name}".format(
-        collection=collection, module_name=module_name
-    )
+    full_module_name = f"{collection}.{module_name}"
     example = ruamel.yaml.load(body_part.value.to_python(), ruamel.yaml.RoundTripLoader)
     # check each task and update to fqcn
     for idx, task in enumerate(example):
@@ -159,10 +157,7 @@ def update_short_description(return_, documentation, module_name):
             parts = module_name.split("_")
             # things like 'interfaces'
             resource = parts[1].lower()
-            if resource in SPECIALS:
-                resource = SPECIALS[resource]
-            else:
-                resource = resource.upper()
+            resource = SPECIALS.get(resource, resource.upper())
             if resource.lower()[-1].endswith("s"):
                 chars = list(resource)
                 chars[-1] = chars[-1].lower()
@@ -201,9 +196,7 @@ def process(collection, path):
     :param path: The collections path
     """
     for subdir in SUBDIRS:
-        dirpath = "{path}{collection}/plugins/{subdir}".format(
-            path=path, collection=collection, subdir=subdir
-        )
+        dirpath = f"{path}{collection}/plugins/{subdir}"
         try:
             plugin_files = os.listdir(dirpath)
         except FileNotFoundError:
@@ -255,7 +248,7 @@ def process(collection, path):
 
                 # Write out the file and black
                 file_contents = ast_obj.dumps()
-                with open(filename, "w") as file_obj:
+                with open(filename, "w", encoding="utf8") as file_obj:
                     file_obj.write(file_contents)
                     logging.info("Wrote %s", filename)
                 black(filename)
