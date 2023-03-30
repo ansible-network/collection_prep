@@ -1,6 +1,5 @@
 # Collection Prep Engine
 
-
 ## INSTALLATION
 
 ```console
@@ -8,6 +7,7 @@ pip install .
 ```
 
 ## CONTENT UPDATER
+
 ```console
 collection_prep_update -c arista.eos -p ./
 ```
@@ -43,12 +43,14 @@ This will generate an RST file for each plugin in the collection docs folder and
 This will also pull the requires_ansible information from the runtime.yml file and add an ansible compatibility section to the README.
 
 For the ansible compatibility, ensure the collection README.md has the following in it:
+
 ```
 <!--start requires_ansible-->
 <!--end requires_ansible-->
 ```
 
 For the plugin table, ensure the collection README.md has the following in it:
+
 ```
 
 <!--start collection content-->
@@ -119,9 +121,11 @@ INFO      README.md updated
 ## meta/runtime.yml GENERATOR
 
 This is intended to operate against the repository clone.
+
 ```console
 collection_prep_runtime -c arista.eos -p ./
 ```
+
 ```console
 INFO      -------------------Processing runtime.yml for module eos_acl_interfaces
 INFO      -------------------Processing runtime.yml for module eos_acls
