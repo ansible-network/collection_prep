@@ -27,6 +27,11 @@ repos:
       - id: cspell
         name: Spell check with cspell
 
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.4.2
+    hooks:
+      - id: remove-tabs
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -34,6 +39,7 @@ repos:
       - id: check-symlinks
       - id: debug-statements
       - id: end-of-file-fixer
+      - id: fix-byte-order-marker
       - id: no-commit-to-branch
       - id: trailing-whitespace
 
