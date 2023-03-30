@@ -1,8 +1,8 @@
+"""Utilities for jinja2."""
 import re
 
 from html import escape as html_escape
 
-from ansible.errors import AnsibleError
 from ansible.module_utils._text import to_text
 from ansible.module_utils.six import string_types
 from jinja2.runtime import Undefined
@@ -20,17 +20,31 @@ _RULER = re.compile(r"HORIZONTALLINE")
 
 
 def to_kludge_ns(key, value):
+    """Save a value for later use.
+
+    :param key: The key to store under
+    :param value: The value to store
+    :return: An empty string to not confuse jinja
+    """
     NS_MAP[key] = value
     return ""
 
 
 def from_kludge_ns(key):
+    """Recall a value stored with to_kludge_ns.
+
+    :param key: The key to look for
+    :return: The value stored under that key
+    """
     return NS_MAP[key]
 
 
 def html_ify(text):
-    """convert symbols like I(this is in italics) to valid HTML"""
+    """Convert symbols like I(this is in italics) to valid HTML.
 
+    :param text: The text to transform
+    :return: An HTML string of the formatted text
+    """
     if not isinstance(text, string_types):
         text = to_text(text)
 
@@ -47,25 +61,28 @@ def html_ify(text):
 
 
 def rst_ify(text):
-    """convert symbols like I(this is in italics) to valid restructured text"""
+    """Convert symbols like I(this is in italics) to valid restructured text.
 
-    try:
-        t = _ITALIC.sub(r"*\1*", text)
-        t = _BOLD.sub(r"**\1**", t)
-        t = _MODULE.sub(r":ref:`\1 <\1_module>`", t)
-        t = _LINK.sub(r"`\1 <\2>`_", t)
-        t = _URL.sub(r"\1", t)
-        t = _CONST.sub(r"``\1``", t)
-        t = _RULER.sub(r"------------", t)
-    except Exception as e:
-        raise AnsibleError(f"Could not process ({text}) : {e}")
+    :param text: The text to transform
+    :return: An RST string of the formatted text
+    """
+    t = _ITALIC.sub(r"*\1*", text)
+    t = _BOLD.sub(r"**\1**", t)
+    t = _MODULE.sub(r":ref:`\1 <\1_module>`", t)
+    t = _LINK.sub(r"`\1 <\2>`_", t)
+    t = _URL.sub(r"\1", t)
+    t = _CONST.sub(r"``\1``", t)
+    t = _RULER.sub(r"------------", t)
 
     return t
 
 
 def documented_type(text):
-    """Convert any python type to a type for documentation"""
+    """Convert any python type to a type for documentation.
 
+    :param text: A python type
+    :return: The associated documentation form of that type
+    """
     if isinstance(text, Undefined):
         return "-"
     if text == "str":

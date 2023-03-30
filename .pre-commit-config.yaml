@@ -22,3 +22,8 @@ repos:
       - id: end-of-file-fixer
       - id: no-commit-to-branch
       - id: trailing-whitespace
+
+  - repo: https://github.com/terrencepreilly/darglint
+    rev: v1.8.1
+    hooks:
+      - id: darglint

@@ -1,3 +1,5 @@
+"""Configuration for setuptools."""
+
 import setuptools
 
 

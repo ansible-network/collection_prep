@@ -1,6 +1,4 @@
-"""
-Get ready for 1.0.0
-"""
+"""Get ready for 1.0.0."""
 import datetime
 
 from redbaron import RedBaron
@@ -13,6 +11,10 @@ REMOVAL_DAY_OF_MONTH = "01"
 
 
 def get_removed_at_date():
+    """Generate expected date to remove deprecated content.
+
+    :return: The date deprecated content will be removed after, in YYYY-MM-DD format
+    """
     today = datetime.date.today()
     deprecation_year = today.year + DEPRECATION_CYCLE_IN_YEAR
     if today.month % REMOVAL_FREQUENCY_IN_MONTHS:
@@ -28,8 +30,7 @@ def get_removed_at_date():
 
 
 def load_py_as_ast(path):
-    """
-    Load a file as an ast object
+    """Load a file as an ast object.
 
     :param path: The full path to the file
     :return: The ast object
@@ -41,8 +42,7 @@ def load_py_as_ast(path):
 
 
 def find_assigment_in_ast(name, ast_file):
-    """
-    Find an assignment in an ast object
+    """Find an assignment in an ast object.
 
     :param name: The name of the assignement to find
     :param ast_file: The ast object

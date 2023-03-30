@@ -1,6 +1,4 @@
-"""
-Get ready for 1.0.0
-"""
+"""Get ready for 1.0.0."""
 import logging
 import os
 import platform
@@ -35,8 +33,7 @@ SPECIALS = {"ospfv2": "OSPFv2", "interfaces": "Interfaces", "static": "Static"}
 
 
 def remove_assigment_in_ast(name, ast_file):
-    """
-    REmoves an assignment in an ast object
+    """Remove an assignment in an ast object.
 
     :param name: The name of the assignement to remove
     :param ast_file: The ast object
@@ -47,9 +44,9 @@ def remove_assigment_in_ast(name, ast_file):
 
 
 def retrieve_plugin_name(plugin_type, bodypart):
-    """
-    Retrieve the module name from a docstring
+    """Retrieve the module name from a docstring.
 
+    :param plugin_type: The plugin's type
     :param bodypart: The doctstring extracted from the ast body
     :return: The module name
     """
@@ -65,6 +62,10 @@ def retrieve_plugin_name(plugin_type, bodypart):
 
 
 def update_deprecation_notice(documentation):
+    """Update deprecation notices to use removed_at_date instead of removed_in.
+
+    :param documentation: The DOCUMENTATION section of the module
+    """
     if "deprecated" in documentation:
         logging.info("Updating deprecation notice")
         documentation["deprecated"].update({"removed_at_date": get_removed_at_date()})
@@ -72,8 +73,7 @@ def update_deprecation_notice(documentation):
 
 
 def update_documentation(bodypart):
-    """
-    Update the docuementation of the module
+    """Update the documentation of the module.
 
     :param bodypart: The DOCUMENTATION section of the module
     """
@@ -100,14 +100,12 @@ def update_documentation(bodypart):
 
 
 def update_examples(bodypart, module_name, collection):
-    """
-    Update the example
+    """Update the example.
 
     :param bodypart: The EXAMPLE section of the module
     :param module_name: The name of the module
     :param collection: The name of the collection
     """
-
     if not bodypart:
         logging.warning("Failed to find EXAMPLES assignment")
         return
@@ -135,10 +133,10 @@ def update_examples(bodypart, module_name, collection):
 
 
 def update_short_description(retrn, documentation, module_name):
-    """
-    Update the short description of the module
+    """Update the short description of the module.
 
-    :param bodypart: The DOCUMENTATION section of the module
+    :param retrn: The RETURN section of the module
+    :param documentation: The DOCUMENTATION section of the module
     :param module_name: The module name
     """
     if not retrn:
@@ -186,8 +184,7 @@ def update_short_description(retrn, documentation, module_name):
 
 
 def black(filename):
-    """
-    Run black against the file
+    """Run black against the file.
 
     :param filename: The full path to the file
     """
@@ -196,8 +193,10 @@ def black(filename):
 
 
 def process(collection, path):
-    """
-    Process the files in each subdirectory
+    """Process the files in each subdirectory.
+
+    :param collection: The name of the collection
+    :param path: The collections path
     """
     for subdir in SUBDIRS:
         dirpath = f"{path}{collection}/plugins/{subdir}"
@@ -257,9 +256,7 @@ def process(collection, path):
 
 
 def main():
-    """
-    The entry point
-    """
+    """Run the script."""
     if not platform.python_version().startswith("3.8"):
         sys.exit("Python 3.8+ required")
     parser = ArgumentParser()
