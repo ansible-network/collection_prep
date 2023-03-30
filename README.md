@@ -17,7 +17,7 @@ INFO      -------------------Processing ./arista.eos/plugins/modules/eos_lacp.py
 INFO      Updated metadata in ./arista.eos/plugins/modules/eos_lacp.py
 INFO      Updated documentation in ./arista.eos/plugins/modules/eos_lacp.py
 INFO      Found a resource module
-INFO      Setting short desciption to 'LACP resource module'
+INFO      Setting short description to 'LACP resource module'
 INFO      Updated examples in ./arista.eos/plugins/modules/eos_lacp.py
 INFO      Wrote ./arista.eos/plugins/modules/eos_lacp.py
 INFO      Running black against ./arista.eos/plugins/modules/eos_lacp.py
@@ -25,7 +25,7 @@ INFO      -------------------Processing ./arista.eos/plugins/modules/eos_static_
 INFO      Updated metadata in ./arista.eos/plugins/modules/eos_static_routes.py
 INFO      Updated documentation in ./arista.eos/plugins/modules/eos_static_routes.py
 INFO      Found a resource module
-INFO      Setting short desciption to 'Static routes resource module'
+INFO      Setting short description to 'Static routes resource module'
 INFO      Updated examples in ./arista.eos/plugins/modules/eos_static_routes.py
 INFO      Wrote ./arista.eos/plugins/modules/eos_static_routes.py
 INFO      Running black against ./arista.eos/plugins/modules/eos_static_routes.py
@@ -67,8 +67,8 @@ INFO      Setting github repository url to https://github.com/ansible-collection
 INFO      Linking collection to user collection directory
 INFO      This is required for the Ansible fragment loader to find doc fragments
 INFO      Attempting to remove existing /home/bthornto/.ansible/collections/ansible_collections/ansible/netcommon
-INFO      Deleteing: /home/bthornto/.ansible/collections/ansible_collections/ansible/netcommon
-INFO      Creating namepsace directory /home/bthornto/.ansible/collections/ansible_collections/ansible
+INFO      Deleting: /home/bthornto/.ansible/collections/ansible_collections/ansible/netcommon
+INFO      Creating namespace directory /home/bthornto/.ansible/collections/ansible_collections/ansible
 INFO      Linking collection /home/bthornto/github/collection_update/ansible.netcommon -> /home/bthornto/.ansible/collections/ansible_collections/ansible/netcommon
 INFO      Purging content from directory /home/bthornto/github/collection_update/ansible.netcommon/docs
 INFO      Making docs directory /home/bthornto/github/collection_update/ansible.netcommon/docs

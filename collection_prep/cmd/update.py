@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 
 import ruamel.yaml
 
-from collection_prep.utils import find_assigment_in_ast
+from collection_prep.utils import find_assignment_in_ast
 from collection_prep.utils import get_removed_at_date
 from collection_prep.utils import load_py_as_ast
 
@@ -32,10 +32,10 @@ SUBDIRS = (
 SPECIALS = {"ospfv2": "OSPFv2", "interfaces": "Interfaces", "static": "Static"}
 
 
-def remove_assigment_in_ast(name, ast_file):
+def remove_assignment_in_ast(name, ast_file):
     """Remove an assignment in an ast object.
 
-    :param name: The name of the assignement to remove
+    :param name: The name of the assignment to remove
     :param ast_file: The ast object
     """
     res = ast_file.find("assignment", target=lambda x: x.dumps() == name)
@@ -43,17 +43,17 @@ def remove_assigment_in_ast(name, ast_file):
         ast_file.remove(res)
 
 
-def retrieve_plugin_name(plugin_type, bodypart):
+def retrieve_plugin_name(plugin_type, body_part):
     """Retrieve the module name from a docstring.
 
     :param plugin_type: The plugin's type
-    :param bodypart: The doctstring extracted from the ast body
+    :param body_part: The docstring extracted from the ast body
     :return: The module name
     """
-    if not bodypart:
+    if not body_part:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return ""
-    documentation = ruamel.yaml.load(bodypart.value.to_python(), ruamel.yaml.RoundTripLoader)
+    documentation = ruamel.yaml.load(body_part.value.to_python(), ruamel.yaml.RoundTripLoader)
 
     if plugin_type == "modules":
         plugin_type = "module"
@@ -72,15 +72,15 @@ def update_deprecation_notice(documentation):
         documentation["deprecated"].pop("removed_in", None)
 
 
-def update_documentation(bodypart):
+def update_documentation(body_part):
     """Update the documentation of the module.
 
-    :param bodypart: The DOCUMENTATION section of the module
+    :param body_part: The DOCUMENTATION section of the module
     """
-    if not bodypart:
+    if not body_part:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return
-    documentation = ruamel.yaml.load(bodypart.value.to_python(), ruamel.yaml.RoundTripLoader)
+    documentation = ruamel.yaml.load(body_part.value.to_python(), ruamel.yaml.RoundTripLoader)
 
     # update deprecation to removed_at_date
     update_deprecation_notice(documentation)
@@ -96,21 +96,23 @@ def update_documentation(bodypart):
     example_lines = repl.splitlines()
     regex = re.compile(r"^\s+version_added\:\s.*$")
     example_lines = [line for line in example_lines if not re.match(regex, line)]
-    bodypart.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
+    body_part.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
 
 
-def update_examples(bodypart, module_name, collection):
+def update_examples(body_part, module_name, collection):
     """Update the example.
 
-    :param bodypart: The EXAMPLE section of the module
+    :param body_part: The EXAMPLE section of the module
     :param module_name: The name of the module
     :param collection: The name of the collection
     """
-    if not bodypart:
+    if not body_part:
         logging.warning("Failed to find EXAMPLES assignment")
         return
-    full_module_name = f"{collection}.{module_name}"
-    example = ruamel.yaml.load(bodypart.value.to_python(), ruamel.yaml.RoundTripLoader)
+    full_module_name = "{collection}.{module_name}".format(
+        collection=collection, module_name=module_name
+    )
+    example = ruamel.yaml.load(body_part.value.to_python(), ruamel.yaml.RoundTripLoader)
     # check each task and update to fqcn
     for idx, task in enumerate(example):
         example[idx] = ruamel.yaml.comments.CommentedMap(
@@ -129,20 +131,20 @@ def update_examples(bodypart, module_name, collection):
             and full_module_name not in line
         ):
             example_lines[idx] = line.replace(module_name, full_module_name)
-    bodypart.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
+    body_part.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
 
 
-def update_short_description(retrn, documentation, module_name):
+def update_short_description(return_, documentation, module_name):
     """Update the short description of the module.
 
-    :param retrn: The RETURN section of the module
+    :param return_: The RETURN section of the module
     :param documentation: The DOCUMENTATION section of the module
     :param module_name: The module name
     """
-    if not retrn:
+    if not return_:
         logging.warning("Failed to find RETURN assignment")
         return
-    ret_section = ruamel.yaml.load(retrn.value.to_python(), ruamel.yaml.RoundTripLoader)
+    ret_section = ruamel.yaml.load(return_.value.to_python(), ruamel.yaml.RoundTripLoader)
     if not documentation:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return
@@ -177,7 +179,7 @@ def update_short_description(retrn, documentation, module_name):
         )
     # Change short if necessary
     if short_description != doc_section["short_description"]:
-        logging.info("Setting short desciption to '%s'", short_description)
+        logging.info("Setting short description to '%s'", short_description)
         doc_section["short_description"] = short_description
         repl = ruamel.yaml.dump(doc_section, None, ruamel.yaml.RoundTripDumper)
         documentation.value.replace('"""\n' + repl + '\n"""')
@@ -199,7 +201,9 @@ def process(collection, path):
     :param path: The collections path
     """
     for subdir in SUBDIRS:
-        dirpath = f"{path}{collection}/plugins/{subdir}"
+        dirpath = "{path}{collection}/plugins/{subdir}".format(
+            path=path, collection=collection, subdir=subdir
+        )
         try:
             plugin_files = os.listdir(dirpath)
         except FileNotFoundError:
@@ -212,45 +216,47 @@ def process(collection, path):
                 logging.info("-------------------Processing %s", filename)
                 ast_obj = load_py_as_ast(filename)
 
-                # Get the module naem from the docstring
+                # Get the module name from the docstring
                 module_name = retrieve_plugin_name(
                     subdir,
-                    find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION"),
+                    find_assignment_in_ast(ast_file=ast_obj, name="DOCUMENTATION"),
                 )
                 if not module_name:
                     logging.warning("Skipped %s: No module name found", filename)
                     continue
 
                 # Remove the metadata
-                remove_assigment_in_ast(ast_file=ast_obj, name="ANSIBLE_METADATA")
+                remove_assignment_in_ast(ast_file=ast_obj, name="ANSIBLE_METADATA")
                 logging.info("Removed metadata in %s", filename)
 
                 # Update the documentation
                 update_documentation(
-                    bodypart=find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION")
+                    body_part=find_assignment_in_ast(ast_file=ast_obj, name="DOCUMENTATION")
                 )
                 logging.info("Updated documentation in %s", filename)
 
                 if subdir == "modules":
                     # Update the short description
                     update_short_description(
-                        retrn=find_assigment_in_ast(ast_file=ast_obj, name="RETURN"),
-                        documentation=find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION"),
+                        return_=find_assignment_in_ast(ast_file=ast_obj, name="RETURN"),
+                        documentation=find_assignment_in_ast(
+                            ast_file=ast_obj, name="DOCUMENTATION"
+                        ),
                         module_name=module_name,
                     )
 
                     # Update the examples
                     update_examples(
-                        bodypart=find_assigment_in_ast(ast_file=ast_obj, name="EXAMPLES"),
+                        body_part=find_assignment_in_ast(ast_file=ast_obj, name="EXAMPLES"),
                         module_name=module_name,
                         collection=collection,
                     )
                     logging.info("Updated examples in %s", filename)
 
                 # Write out the file and black
-                filec = ast_obj.dumps()
-                with open(filename, "w") as fileh:
-                    fileh.write(filec)
+                file_contents = ast_obj.dumps()
+                with open(filename, "w") as file_obj:
+                    file_obj.write(file_contents)
                     logging.info("Wrote %s", filename)
                 black(filename)
 

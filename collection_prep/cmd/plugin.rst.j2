@@ -79,9 +79,9 @@ Parameters
 
     <table  border=0 cellpadding=0 class="documentation-table">
         {# Pre-compute the nesting depth to allocate columns -#}
-        @{ to_kludge_ns('maxdepth', 1) -}@
+        @{ to_kludge_ns('max_depth', 1) -}@
         {% for key, value in options|dictsort recursive -%}
-            @{ to_kludge_ns('maxdepth', [loop.depth, from_kludge_ns('maxdepth')] | max) -}@
+            @{ to_kludge_ns('max_depth', [loop.depth, from_kludge_ns('max_depth')] | max) -}@
             {% if value.suboptions -%}
                 {% if value.suboptions.items -%}
                     @{ loop(value.suboptions.items()) -}@
@@ -92,7 +92,7 @@ Parameters
         {% endfor -%}
         {# Header of the documentation #}
         <tr>
-            <th colspan="@{ from_kludge_ns('maxdepth') }@">Parameter</th>
+            <th colspan="@{ from_kludge_ns('max_depth') }@">Parameter</th>
             <th>Choices/<font color="blue">Defaults</font></th>
             {% if plugin_type != 'module' %}
                 <th>Configuration</th>
@@ -106,7 +106,7 @@ Parameters
                     <td class="elbow-placeholder"></td>
                 {% endfor %}
                 {# parameter name with required and/or introduced label #}
-                <td colspan="@{ from_kludge_ns('maxdepth') - loop.depth0 }@">
+                <td colspan="@{ from_kludge_ns('max_depth') - loop.depth0 }@">
                     <div class="ansibleOptionAnchor" id="parameter-{% for part in value.full_key %}@{ part }@{% if not loop.last %}/{% endif %}{% endfor %}"></div>
                     <b>@{ key }@</b>
                     <a class="ansibleOptionLink" href="#parameter-{% for part in value.full_key %}@{ part }@{% if not loop.last %}/{% endif %}{% endfor %}" title="Permalink to this option"></a>
@@ -173,8 +173,8 @@ Parameters
                             {% endfor %}
                         {% endif %}
                         {% if 'vars' in value %}
-                            {% for myvar in value.vars %}
-                                <div>var: @{ myvar.name }@</div>
+                            {% for var in value.vars %}
+                                <div>var: @{ var.name }@</div>
                             {% endfor %}
                         {% endif %}
                     </td>
@@ -237,7 +237,7 @@ See Also
 
 {% endif %}
 
-{% if examples or plainexamples -%}
+{% if examples or plain_examples -%}
 
 Examples
 --------
@@ -248,16 +248,16 @@ Examples
 {%     if example['description'] %}@{ example['description'] | indent(4, True) }@{% endif %}
 @{ example['code'] | escape | indent(4, True) }@
 {%   endfor %}
-{%   if plainexamples %}@{ plainexamples | indent(4, True) }@{% endif %}
+{%   if plain_examples %}@{ plain_examples | indent(4, True) }@{% endif %}
 
 {% endif %}
 
-{% if not returnfacts and returndocs and returndocs.ansible_facts is defined %}
-{%   set returnfacts = returndocs.ansible_facts.contains %}
-{%   set _x = returndocs.pop('ansible_facts', None) %}
+{% if not return_facts and return_docs and return_docs.ansible_facts is defined %}
+{%   set return_facts = return_docs.ansible_facts.contains %}
+{%   set _x = return_docs.pop('ansible_facts', None) %}
 {% endif %}
 
-{% if returnfacts -%}
+{% if return_facts -%}
 
 Returned Facts
 --------------
@@ -267,9 +267,9 @@ Facts returned by this module are added/updated in the ``hostvars`` host facts a
 
     <table border=0 cellpadding=0 class="documentation-table">
         {# Pre-compute the nesting depth to allocate columns #}
-        @{ to_kludge_ns('maxdepth', 1) -}@
-        {% for key, value in returnfacts|dictsort recursive %}
-            @{ to_kludge_ns('maxdepth', [loop.depth, from_kludge_ns('maxdepth')] | max) -}@
+        @{ to_kludge_ns('max_depth', 1) -}@
+        {% for key, value in return_facts|dictsort recursive %}
+            @{ to_kludge_ns('max_depth', [loop.depth, from_kludge_ns('max_depth')] | max) -}@
             {% if value.contains -%}
                 {% if value.contains.items -%}
                     @{ loop(value.contains.items()) -}@
@@ -279,16 +279,16 @@ Facts returned by this module are added/updated in the ``hostvars`` host facts a
             {% endif -%}
         {% endfor -%}
         <tr>
-            <th colspan="@{ from_kludge_ns('maxdepth') }@">Fact</th>
+            <th colspan="@{ from_kludge_ns('max_depth') }@">Fact</th>
             <th>Returned</th>
             <th width="100%">Description</th>
         </tr>
-        {% for key, value in returnfacts|dictsort recursive %}
+        {% for key, value in return_facts|dictsort recursive %}
             <tr>
                 {% for i in range(1, loop.depth) %}
                     <td class="elbow-placeholder"></td>
                 {% endfor %}
-                <td colspan="@{ from_kludge_ns('maxdepth') - loop.depth0 }@" colspan="@{ from_kludge_ns('maxdepth') - loop.depth0 }@">
+                <td colspan="@{ from_kludge_ns('max_depth') - loop.depth0 }@" colspan="@{ from_kludge_ns('max_depth') - loop.depth0 }@">
                     <div class="ansibleOptionAnchor" id="return-{% for part in value.full_key %}@{ part }@{% if not loop.last %}/{% endif %}{% endfor %}"></div>
                     <b>@{ key }@</b>
                     <a class="ansibleOptionLink" href="#return-{% for part in value.full_key %}@{ part }@{% if not loop.last %}/{% endif %}{% endfor %}" title="Permalink to this fact"></a>
@@ -339,7 +339,7 @@ Facts returned by this module are added/updated in the ``hostvars`` host facts a
 
 {% endif %}
 
-{% if returndocs -%}
+{% if return_docs -%}
 
 Return Values
 -------------
@@ -348,9 +348,9 @@ Common return values are documented `here <https://docs.ansible.com/ansible/late
 .. raw:: html
 
     <table border=0 cellpadding=0 class="documentation-table">
-        @{ to_kludge_ns('maxdepth', 1) -}@
-        {% for key, value in returndocs|dictsort recursive -%}
-            @{ to_kludge_ns('maxdepth', [loop.depth, from_kludge_ns('maxdepth')] | max) -}@
+        @{ to_kludge_ns('max_depth', 1) -}@
+        {% for key, value in return_docs|dictsort recursive -%}
+            @{ to_kludge_ns('max_depth', [loop.depth, from_kludge_ns('max_depth')] | max) -}@
             {% if value.contains -%}
                 {% if value.contains.items -%}
                     @{ loop(value.contains.items()) -}@
@@ -360,16 +360,16 @@ Common return values are documented `here <https://docs.ansible.com/ansible/late
             {% endif -%}
         {% endfor -%}
         <tr>
-            <th colspan="@{ from_kludge_ns('maxdepth') }@">Key</th>
+            <th colspan="@{ from_kludge_ns('max_depth') }@">Key</th>
             <th>Returned</th>
             <th width="100%">Description</th>
         </tr>
-        {% for key, value in returndocs|dictsort recursive %}
+        {% for key, value in return_docs|dictsort recursive %}
             <tr>
                 {% for i in range(1, loop.depth) %}
                     <td class="elbow-placeholder">&nbsp;</td>
                 {% endfor %}
-                <td colspan="@{ from_kludge_ns('maxdepth') - loop.depth0 }@">
+                <td colspan="@{ from_kludge_ns('max_depth') - loop.depth0 }@">
                     <div class="ansibleOptionAnchor" id="return-{% for part in value.full_key %}@{ part }@{% if not loop.last %}/{% endif %}{% endfor %}"></div>
                     <b>@{ key }@</b>
                     <a class="ansibleOptionLink" href="#return-{% for part in value.full_key %}@{ part }@{% if not loop.last %}/{% endif %}{% endfor %}" title="Permalink to this return value"></a>

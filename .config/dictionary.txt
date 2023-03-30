@@ -1,0 +1,44 @@
+# Ansible jargon
+cliconf
+devel
+fqcn
+hostvars
+httpapi
+netcommon
+netconf
+restconf
+# Resource modules and filter plugins
+acls
+cidr
+hwaddr
+ipaddr
+ipmath
+ipsubnet
+ipwrap
+lacp
+linkagg
+macaddr
+nthhost
+ospfv
+slaac
+# Python packages
+argcomplete
+redbaron
+ruamel
+textfsm
+# Jijna / RST / HTML directives
+colspan
+darkgreen
+dictsort
+endfor
+htmlify
+HORIZONTALLINE
+larr
+nbsp
+sameas
+seealso
+tojson
+# Misc
+bthornto
+levelname
+suboptions

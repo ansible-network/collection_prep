@@ -21,6 +21,12 @@ repos:
     hooks:
       - id: black
 
+  - repo: https://github.com/streetsidesoftware/cspell-cli
+    rev: v6.31.0
+    hooks:
+      - id: cspell
+        name: Spell check with cspell
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:

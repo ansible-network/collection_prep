@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 
 import ruamel.yaml
 
-from collection_prep.utils import find_assigment_in_ast
+from collection_prep.utils import find_assignment_in_ast
 from collection_prep.utils import get_removed_at_date
 from collection_prep.utils import load_py_as_ast
 
@@ -56,7 +56,7 @@ def process_runtime_plugin_routing(collection, path):
         logging.info(f"-------------------Processing runtime.yml for module {module_name}")
 
         ast_obj = load_py_as_ast(fullpath)
-        documentation = find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION")
+        documentation = find_assignment_in_ast(ast_file=ast_obj, name="DOCUMENTATION")
         doc_section = ruamel.yaml.load(documentation.value.to_python(), ruamel.yaml.RoundTripLoader)
 
         try:

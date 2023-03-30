@@ -180,12 +180,12 @@ def update_readme(content, path, gh_url, branch_name):
         sys.exit(1)
     if start and end:
         new = content[0 : start + 1] + data + content[end:]
-        with open(readme, "w") as fhand:
-            fhand.write("\n".join(new))
+        with open(readme, "w") as readme_file:
+            readme_file.write("\n".join(new))
             # Avoid "No newline at end of file.
             # No, I don't know why it has to be two of them.
             # Yes, it actually does have to be two of them.
-            fhand.write("\n\n")
+            readme_file.write("\n\n")
         logging.info("README.md updated")
 
 
@@ -213,28 +213,28 @@ def handle_simple(collection, fullpath, kind):
         sys.exit(1)
 
     plugins = {}
-    with open(fullpath) as fhand:
-        file_contents = fhand.read()
+    with open(fullpath) as file_obj:
+        file_contents = file_obj.read()
     module = ast.parse(file_contents)
     function_definitions = {
         node.name: ast.get_docstring(node)
         for node in module.body
         if isinstance(node, ast.FunctionDef)
     }
-    classdef = [
+    class_def = [
         node for node in module.body if isinstance(node, ast.ClassDef) and node.name == class_name
     ]
-    if not classdef:
+    if not class_def:
         return plugins
     else:
-        docstring = ast.get_docstring(classdef[0], clean=True)
+        docstring = ast.get_docstring(class_def[0], clean=True)
         if docstring:
             plugins["_description"] = docstring.strip()
 
     simple_map = next(
         (
             node
-            for node in classdef[0].body
+            for node in class_def[0].body
             if isinstance(node, ast.Assign)
             and hasattr(node, "targets")
             and node.targets[0].id == map_name
@@ -245,7 +245,7 @@ def handle_simple(collection, fullpath, kind):
     if not simple_map:
         simple_func = [
             func
-            for func in classdef[0].body
+            for func in class_def[0].body
             if isinstance(func, ast.FunctionDef) and func.name == func_name
         ]
         if not simple_func:
@@ -317,7 +317,7 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
                     (
                         doc,
                         examples,
-                        returndocs,
+                        return_docs,
                         metadata,
                     ) = plugin_docs.get_docstring(to_text(fullpath), fragment_loader)
                     if doc is None and subdir in ["filter", "test"]:
@@ -328,18 +328,18 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
                         if doc:
                             doc["plugin_type"] = plugin_type
 
-                            if returndocs:
+                            if return_docs:
                                 # Seems a recent change in devel makes this
                                 # return a dict not a yaml string.
-                                if isinstance(returndocs, dict):
-                                    doc["returndocs"] = returndocs
+                                if isinstance(return_docs, dict):
+                                    doc["return_docs"] = return_docs
                                 else:
-                                    doc["returndocs"] = yaml.safe_load(returndocs)
-                                convert_descriptions(doc["returndocs"])
+                                    doc["return_docs"] = yaml.safe_load(return_docs)
+                                convert_descriptions(doc["return_docs"])
 
                             doc["metadata"] = (metadata,)
                             if isinstance(examples, string_types):
-                                doc["plainexamples"] = examples.strip()
+                                doc["plain_examples"] = examples.strip()
                             else:
                                 doc["examples"] = examples
 
@@ -430,7 +430,7 @@ def link_collection(path: Path, galaxy: dict, collection_root: Optional[Path] = 
             logging.info("Unlinking: %s", collection_directory)
             collection_directory.unlink()
         else:
-            logging.info("Deleteing: %s", collection_directory)
+            logging.info("Deleting: %s", collection_directory)
             shutil.rmtree(collection_directory)
 
     logging.info("Creating namespace directory %s", namespace_directory)
@@ -507,8 +507,8 @@ def add_ansible_compatibility(runtime, path):
     if start and end:
         data = ANSIBLE_COMPAT.format(requires_ansible=requires_ansible).splitlines()
         new = content[0 : start + 1] + data + content[end:]
-        with open(readme, "w") as fhand:
-            fhand.write("\n".join(new))
+        with open(readme, "w") as readme_file:
+            readme_file.write("\n".join(new))
         logging.info("README.md updated with ansible compatibility information")
 
 
