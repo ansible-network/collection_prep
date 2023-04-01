@@ -77,7 +77,7 @@ def update_deprecation_notice(documentation):
 
 def update_documentation(bodypart):
     """
-    Update the docuementation of the module
+    Update the documentation of the module
 
     :param bodypart: The DOCUMENTATION section of the module
     """
@@ -92,14 +92,17 @@ def update_documentation(bodypart):
     update_deprecation_notice(documentation)
 
     # remove version added
-    documentation.pop("version_added", None)
-    desc_idx = [
-        idx
-        for idx, key in enumerate(documentation.keys())
-        if key == "description"
-    ]
-    # insert version_added after the description
-    documentation.insert(desc_idx[0] + 1, key="version_added", value="1.0.0")
+    version_added = documentation.pop("version_added", None)
+    if version_added is not None:
+        desc_idx = [
+            idx
+            for idx, key in enumerate(documentation.keys())
+            if key == "description"
+        ]
+        # insert version_added after the description
+        documentation.insert(desc_idx[0] + 1, key="version_added", value=version_added)
+    else:
+        logging.warning("Field 'version_added' not found.")
     repl = ruamel.yaml.dump(documentation, None, ruamel.yaml.RoundTripDumper)
 
     # remove version added from anywhere else in the docstring if preceded by 1+ spaces
