@@ -1,9 +1,10 @@
-from argparse import ArgumentParser
 import logging
-from pathlib import Path
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
 
 import ruamel.yaml
+
 yaml = ruamel.yaml.YAML()
 # Preserve document layout
 yaml.block_seq_indent = 2

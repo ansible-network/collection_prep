@@ -16,8 +16,8 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
-from ansible.module_utils.common.collections import is_sequence
 from ansible.module_utils._text import to_text
+from ansible.module_utils.common.collections import is_sequence
 from ansible.module_utils.six import string_types
 from ansible.plugins.loader import fragment_loader
 from ansible.utils import plugin_docs
@@ -340,7 +340,9 @@ def process(
                         examples,
                         returndocs,
                         metadata,
-                    ) = plugin_docs.get_docstring(to_text(fullpath), fragment_loader)
+                    ) = plugin_docs.get_docstring(
+                        to_text(fullpath), fragment_loader
+                    )
                     if doc is None and subdir in ["filter", "test"]:
                         name_only = filename.rsplit(".")[0]
                         combined_ptype = "%s %s" % (name_only, subdir)
