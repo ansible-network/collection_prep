@@ -1,3 +1,4 @@
+"""Script to guess the next version of an ansible collection."""
 import logging
 import sys
 
@@ -42,6 +43,11 @@ RULES = {
 
 
 def get_last_version(path) -> str:
+    """Get the last released version of a collection.
+
+    :param path: The collection base path
+    :return: The last version in changelog.yaml, or "0.0.0"
+    """
     changelog_path = path / "changelogs" / "changelog.yaml"
     if not changelog_path.exists():
         # Collection has not been released?
@@ -51,6 +57,12 @@ def get_last_version(path) -> str:
 
 
 def update_version(path: Path, version: str) -> str:
+    """Generate the likely next version of a collection.
+
+    :param path: The collection base path
+    :param version: The current collection version
+    :return: The expected next version
+    """
     version_parts = [int(v) for v in version.split(".")]
     fragment_path = path / "changelogs" / "fragments"
 
@@ -80,6 +92,12 @@ def update_version(path: Path, version: str) -> str:
 
 
 def update_galaxy(path: Path, new_version: str) -> bool:
+    """Update the version in galaxy.yml if necessary.
+
+    :param path: The collection base path
+    :param new_version: The version that should be in galaxy.yml
+    :return: True if the version needed to be updated otherwise False
+    """
     galaxy_path = path / "galaxy.yml"
     if galaxy_path.exists():
         galaxy = yaml.load(galaxy_path)
@@ -97,6 +115,7 @@ def update_galaxy(path: Path, new_version: str) -> bool:
 
 
 def main() -> None:
+    """Run the script."""
     parser = ArgumentParser()
     parser.add_argument(
         "-p",

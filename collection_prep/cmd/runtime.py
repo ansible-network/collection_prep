@@ -1,6 +1,4 @@
-"""
-Get ready for 1.0.0
-"""
+"""Get ready for 1.0.0."""
 import glob
 import logging
 import os
@@ -23,12 +21,21 @@ REMOVAL_FREQUENCY_IN_MONTHS = 3
 REMOVAL_DAY_OF_MONTH = "01"
 
 
-def get_warning_msg(plugin_name=None):
-    depcrecation_msg = "See the plugin documentation for more details"
-    return depcrecation_msg
+def get_warning_msg():
+    """Return warning text for a plugin.
+
+    :return: Additional details on the deprecation
+    """
+    return "See the plugin documentation for more details"
 
 
 def process_runtime_plugin_routing(collection, path):
+    """Process collection plugins to generate a plugin routing map.
+
+    :param collection: The name of the collection
+    :param path: The collections path
+    :return: A dictionary representing plugins and redirects and deprecations
+    """
     plugin_routing = {}
     plugins_path = f"{path}/{collection}/plugins"
     modules_path = f"{plugins_path}/modules"
@@ -93,7 +100,7 @@ def process_runtime_plugin_routing(collection, path):
                     module_name: {
                         "deprecation": {
                             "removal_date": get_removed_at_date(),
-                            "warning_text": get_warning_msg(f"{collection}.{module_name}"),
+                            "warning_text": get_warning_msg(),
                         }
                     }
                 }
@@ -106,7 +113,7 @@ def process_runtime_plugin_routing(collection, path):
                     {
                         "deprecation": {
                             "removal_date": get_removed_at_date(),
-                            "warning_text": get_warning_msg(f"{collection}.{short_name}"),
+                            "warning_text": get_warning_msg(),
                         }
                     }
                 )
@@ -115,6 +122,11 @@ def process_runtime_plugin_routing(collection, path):
 
 
 def process(collection, path):
+    """Generate or update runtime.yml on a collection.
+
+    :param collection: The collection name
+    :param path: The collections path
+    """
     rt_obj = {}
     collection_path = os.path.join(path, collection)
     if not os.path.exists(collection_path):
@@ -143,9 +155,7 @@ def process(collection, path):
 
 
 def main():
-    """
-    The entry point
-    """
+    """Run the script."""
     parser = ArgumentParser()
     parser.add_argument("-c", "--collection", help="The name of the collection", required=True)
     parser.add_argument("-p", "--path", help="The path to the collection", required=True)

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # PYTHON_ARGCOMPLETE_OK
 
-""" doc generator
-"""
+"""Generate or update collection documentation."""
 import ast
 import logging
 import os
@@ -71,7 +70,7 @@ PEP440 is the schema used to describe the versions of Ansible.
 
 
 def ensure_list(value):
-    """Ensure the value is a list
+    """Ensure the value is a list.
 
     :param value: The value to check
     :type value: Unknown
@@ -83,7 +82,7 @@ def ensure_list(value):
 
 
 def convert_descriptions(data):
-    """Convert the descriptions for doc into lists
+    """Convert the descriptions for doc into lists.
 
     :param data: the chunk from the doc
     :type data: dict
@@ -99,7 +98,7 @@ def convert_descriptions(data):
 
 
 def jinja_environment():
-    """Define the jinja environment
+    """Define the jinja environment.
 
     :return: A jinja template, with the env set
     """
@@ -121,12 +120,10 @@ def jinja_environment():
 
 
 def update_readme(content, path, gh_url, branch_name):
-    """Update the README.md in the repository
+    """Update the README.md in the repository.
 
     :param content: The dict containing the content
     :type content: dict
-    :param collection: The full collection name
-    :type collection: str
     :param path: The path to the collection
     :type path: str
     :param gh_url: The url to the GitHub repository
@@ -193,9 +190,7 @@ def update_readme(content, path, gh_url, branch_name):
 
 
 def handle_simple(collection, fullpath, kind):
-    """Grab each plugin from a plugin file and
-    use the def comment if available. Intended for use
-    with "simple" plugins, like filter or tests
+    """Process "simple" plugins like filter or test.
 
     :param collection: The full collection name
     :type collection: str
@@ -276,9 +271,7 @@ def handle_simple(collection, fullpath, kind):
     simple_map = dict(zip(keys, values))
     for name, func in simple_map.items():
         if func in function_definitions:
-            comment = function_definitions[func] or "{collection} {name} {kind} plugin".format(
-                collection=collection, name=name, kind=kind
-            )
+            comment = function_definitions[func] or f"{collection} {name} {kind} plugin"
 
             # Get the first line from the docstring for the description and
             # make that the short description.
@@ -288,13 +281,13 @@ def handle_simple(collection, fullpath, kind):
 
 
 def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
-    """
-    Process the files in each subdirectory
+    """Process the files in each subdirectory.
 
     :param collection: The collection name
     :type collection: str
     :param path: The path to the collection
-    :type path: str
+    :type path: Path
+    :return: A mapping of plugins to plugin types
     """
     template = jinja_environment()
     docs_path = Path(path, "docs")
@@ -377,7 +370,7 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
 
 
 def load_galaxy(path):
-    """Load collection details from the galaxy.yml file in the collection
+    """Load collection details from the galaxy.yml file in the collection.
 
     :param path: The path the collection
     :return: The collection name and gh url
@@ -395,7 +388,7 @@ def load_galaxy(path):
 
 
 def load_runtime(path):
-    """Load runtime details from the runtime.yml file in the collection
+    """Load runtime details from the runtime.yml file in the collection.
 
     :param path: The path the collection
     :return: The runtime dict
@@ -413,14 +406,14 @@ def load_runtime(path):
 
 
 def link_collection(path: Path, galaxy: dict, collection_root: Optional[Path] = None):
-    """Link the provided collection into the Ansible default collection path
+    """Link the provided collection into the Ansible default collection path.
 
     :param path: A path
-    :type path: str
+    :type path: Path
     :param galaxy: The galaxy.yml contents
     :type galaxy: dict
+    :param collection_root: The root collections path
     """
-
     if collection_root is None:
         collection_root = Path(Path.home(), ".ansible/collections/ansible_collections")
 
@@ -448,7 +441,12 @@ def link_collection(path: Path, galaxy: dict, collection_root: Optional[Path] = 
 
 
 def add_collection(path: Path, galaxy: dict) -> Optional[tempfile.TemporaryDirectory]:
-    """Add path to collections dir so we can find local doc_fragments"""
+    """Add path to collections dir so we can find local doc_fragments.
+
+    :param path: The collections path
+    :param galaxy: The contents of galaxy.yml
+    :return: A temporary alternate directory if the collection is not in a valid location
+    """
     collections_path = None
     tempdir = None
 
@@ -480,7 +478,7 @@ def add_collection(path: Path, galaxy: dict) -> Optional[tempfile.TemporaryDirec
 
 
 def add_ansible_compatibility(runtime, path):
-    """Add ansible compatibility information to README
+    """Add ansible compatibility information to README.
 
     :param runtime: runtime.yml contents
     :type runtime: dict
@@ -515,9 +513,7 @@ def add_ansible_compatibility(runtime, path):
 
 
 def main():
-    """
-    The entry point
-    """
+    """Run the script."""
     parser = ArgumentParser()
     parser.add_argument(
         "-p",

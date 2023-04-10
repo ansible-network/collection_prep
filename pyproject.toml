@@ -4,6 +4,7 @@ line-length = 100
 [tool.ruff]
 line-length = 100
 select = [
+  "D", # pydocstyle
   "E", # pycodestyle
   "F", # pyflakes
   "I", # isort
