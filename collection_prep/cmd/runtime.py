@@ -42,7 +42,6 @@ def process_runtime_plugin_routing(collection, path):
         logging.error(f"failed to get collection name from {collection}")
 
     for fullpath in sorted(glob.glob(f"{modules_path}/*.py")):
-
         filename = fullpath.split("/")[-1]
         if not filename.endswith(".py") or filename.endswith("__init__.py"):
             continue
