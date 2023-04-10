@@ -10,29 +10,29 @@ import re
 import shutil
 import sys
 import tempfile
+
 from argparse import ArgumentParser
 from functools import partial
 from pathlib import Path
 from typing import Optional
 
 import yaml
+
 from ansible.module_utils._text import to_text
 from ansible.module_utils.common.collections import is_sequence
 from ansible.module_utils.six import string_types
 from ansible.plugins.loader import fragment_loader
 from ansible.utils import plugin_docs
-from ansible.utils.collection_loader._collection_finder import (
-    _AnsibleCollectionFinder,
-)
-from jinja2 import Environment, FileSystemLoader
+from ansible.utils.collection_loader._collection_finder import _AnsibleCollectionFinder
+from jinja2 import Environment
+from jinja2 import FileSystemLoader
 
-from collection_prep.jinja_utils import (
-    documented_type,
-    from_kludge_ns,
-    html_ify,
-    rst_ify,
-    to_kludge_ns,
-)
+from collection_prep.jinja_utils import documented_type
+from collection_prep.jinja_utils import from_kludge_ns
+from collection_prep.jinja_utils import html_ify
+from collection_prep.jinja_utils import rst_ify
+from collection_prep.jinja_utils import to_kludge_ns
+
 
 try:
     import argcomplete
@@ -91,9 +91,7 @@ def convert_descriptions(data):
     if data:
         for definition in data.values():
             if "description" in definition:
-                definition["description"] = ensure_list(
-                    definition["description"]
-                )
+                definition["description"] = ensure_list(definition["description"])
             if "suboptions" in definition:
                 convert_descriptions(definition["suboptions"])
             if "contains" in definition:
@@ -145,11 +143,7 @@ def update_readme(content, path, gh_url, branch_name):
         if plugin_type == "modules":
             data.append("### Modules")
         else:
-            data.append(
-                "### {plugin_type} plugins".format(
-                    plugin_type=plugin_type.capitalize()
-                )
-            )
+            data.append(f"### {plugin_type.capitalize()} plugins")
             if "_description" in plugins:
                 data.append(plugins.pop("_description"))
                 data.append("")
@@ -233,9 +227,7 @@ def handle_simple(collection, fullpath, kind):
         if isinstance(node, ast.FunctionDef)
     }
     classdef = [
-        node
-        for node in module.body
-        if isinstance(node, ast.ClassDef) and node.name == class_name
+        node for node in module.body if isinstance(node, ast.ClassDef) and node.name == class_name
     ]
     if not classdef:
         return plugins
@@ -270,8 +262,7 @@ def handle_simple(collection, fullpath, kind):
             (
                 node
                 for node in simple_func[0].body
-                if isinstance(node, ast.Return)
-                and isinstance(node.value, ast.Dict)
+                if isinstance(node, ast.Return) and isinstance(node.value, ast.Dict)
             ),
             None,
         )
@@ -285,26 +276,18 @@ def handle_simple(collection, fullpath, kind):
     simple_map = dict(zip(keys, values))
     for name, func in simple_map.items():
         if func in function_definitions:
-            comment = function_definitions[
-                func
-            ] or "{collection} {name} {kind} plugin".format(
+            comment = function_definitions[func] or "{collection} {name} {kind} plugin".format(
                 collection=collection, name=name, kind=kind
             )
 
             # Get the first line from the docstring for the description and
             # make that the short description.
-            comment = next(
-                c for c in comment.splitlines() if c and not c.startswith(":")
-            )
-            plugins[
-                "{collection}.{name}".format(collection=collection, name=name)
-            ] = {"has_rst": False, "comment": comment}
+            comment = next(c for c in comment.splitlines() if c and not c.startswith(":"))
+            plugins[f"{collection}.{name}"] = {"has_rst": False, "comment": comment}
     return plugins
 
 
-def process(
-    collection: str, path: Path
-):  # pylint: disable-msg=too-many-locals
+def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
     """
     Process the files in each subdirectory
 
@@ -343,15 +326,11 @@ def process(
                         examples,
                         returndocs,
                         metadata,
-                    ) = plugin_docs.get_docstring(
-                        to_text(fullpath), fragment_loader
-                    )
+                    ) = plugin_docs.get_docstring(to_text(fullpath), fragment_loader)
                     if doc is None and subdir in ["filter", "test"]:
                         name_only = filename.rsplit(".")[0]
-                        combined_ptype = "%s %s" % (name_only, subdir)
-                        content[combined_ptype] = handle_simple(
-                            collection, fullpath, subdir
-                        )
+                        combined_ptype = f"{name_only} {subdir}"
+                        content[combined_ptype] = handle_simple(collection, fullpath, subdir)
                     else:
                         if doc:
                             doc["plugin_type"] = plugin_type
@@ -362,9 +341,7 @@ def process(
                                 if isinstance(returndocs, dict):
                                     doc["returndocs"] = returndocs
                                 else:
-                                    doc["returndocs"] = yaml.safe_load(
-                                        returndocs
-                                    )
+                                    doc["returndocs"] = yaml.safe_load(returndocs)
                                 convert_descriptions(doc["returndocs"])
 
                             doc["metadata"] = (metadata,)
@@ -373,18 +350,12 @@ def process(
                             else:
                                 doc["examples"] = examples
 
-                            doc[
-                                "module"
-                            ] = "{collection}.{plugin_name}".format(
+                            doc["module"] = "{collection}.{plugin_name}".format(
                                 collection=collection,
-                                plugin_name=doc.get(
-                                    plugin_type, doc.get("name")
-                                ),
+                                plugin_name=doc.get(plugin_type, doc.get("name")),
                             )
                             doc["author"] = ensure_list(doc["author"])
-                            doc["description"] = ensure_list(
-                                doc["description"]
-                            )
+                            doc["description"] = ensure_list(doc["description"])
                             try:
                                 convert_descriptions(doc["options"])
                             except KeyError:
@@ -393,9 +364,7 @@ def process(
                             module_rst_path = Path(
                                 path,
                                 "docs",
-                                doc["module"]
-                                + "_{0}".format(plugin_type)
-                                + ".rst",
+                                doc["module"] + f"_{plugin_type}" + ".rst",
                             )
 
                             with open(module_rst_path, "w") as fd:
@@ -414,10 +383,10 @@ def load_galaxy(path):
     :return: The collection name and gh url
     """
     try:
-        with open(Path(path, "galaxy.yml"), "r") as stream:
+        with open(Path(path, "galaxy.yml")) as stream:
             try:
                 return yaml.safe_load(stream)
-            except yaml.YAMLError as _exc:
+            except yaml.YAMLError:
                 logging.error("Unable to parse galaxy.yml in %s", path)
                 sys.exit(1)
     except FileNotFoundError:
@@ -432,10 +401,10 @@ def load_runtime(path):
     :return: The runtime dict
     """
     try:
-        with open(Path(path, "meta/runtime.yml"), "r") as stream:
+        with open(Path(path, "meta/runtime.yml")) as stream:
             try:
                 return yaml.safe_load(stream)
-            except yaml.YAMLError as _exc:
+            except yaml.YAMLError:
                 logging.error("Unable to parse runtime.yml in %s", path)
                 sys.exit(1)
     except FileNotFoundError:
@@ -443,9 +412,7 @@ def load_runtime(path):
         sys.exit(1)
 
 
-def link_collection(
-    path: Path, galaxy: dict, collection_root: Optional[Path] = None
-):
+def link_collection(path: Path, galaxy: dict, collection_root: Optional[Path] = None):
     """Link the provided collection into the Ansible default collection path
 
     :param path: A path
@@ -455,17 +422,13 @@ def link_collection(
     """
 
     if collection_root is None:
-        collection_root = Path(
-            Path.home(), ".ansible/collections/ansible_collections"
-        )
+        collection_root = Path(Path.home(), ".ansible/collections/ansible_collections")
 
     namespace_directory = Path(collection_root, galaxy["namespace"])
     collection_directory = Path(namespace_directory, galaxy["name"])
 
     logging.info("Linking collection to collection path %s", collection_root)
-    logging.info(
-        "This is required for the Ansible fragment loader to find doc fragments"
-    )
+    logging.info("This is required for the Ansible fragment loader to find doc fragments")
 
     if collection_directory.exists():
         logging.info("Attempting to remove existing %s", collection_directory)
@@ -484,9 +447,7 @@ def link_collection(
     collection_directory.symlink_to(path)
 
 
-def add_collection(
-    path: Path, galaxy: dict
-) -> Optional[tempfile.TemporaryDirectory]:
+def add_collection(path: Path, galaxy: dict) -> Optional[tempfile.TemporaryDirectory]:
     """Add path to collections dir so we can find local doc_fragments"""
     collections_path = None
     tempdir = None
@@ -498,9 +459,7 @@ def add_collection(
 
     # Check that parent dir is named ansible_collections
     if collections_path and collections_path.name != "ansible_collections":
-        logging.info(
-            "%s doesn't look enough like a collection", collections_path
-        )
+        logging.info("%s doesn't look enough like a collection", collections_path)
         collections_path = None
 
     if collections_path is None:
@@ -513,9 +472,7 @@ def add_collection(
     logging.info("Collection path is %s", full_path)
 
     # Tell ansible about the path
-    _AnsibleCollectionFinder(
-        paths=[collections_path, "~/.ansible/collections"]
-    )._install()
+    _AnsibleCollectionFinder(paths=[collections_path, "~/.ansible/collections"])._install()
 
     # This object has to outlive this method or it will be cleaned up before
     # we can use it
@@ -532,9 +489,7 @@ def add_ansible_compatibility(runtime, path):
     """
     requires_ansible = runtime.get("requires_ansible")
     if not requires_ansible:
-        logging.error(
-            "Unable to find requires_ansible in runtime.yml, not added to README"
-        )
+        logging.error("Unable to find requires_ansible in runtime.yml, not added to README")
         return
     readme = os.path.join(path, "README.md")
     try:
@@ -547,22 +502,16 @@ def add_ansible_compatibility(runtime, path):
     try:
         start = content.index("<!--start requires_ansible-->")
         end = content.index("<!--end requires_ansible-->")
-    except ValueError as _err:
+    except ValueError:
         logging.error("requires_ansible anchors not found in %s", readme)
-        logging.error(
-            "README.md not updated with ansible compatibility information"
-        )
+        logging.error("README.md not updated with ansible compatibility information")
         sys.exit(1)
     if start and end:
-        data = ANSIBLE_COMPAT.format(
-            requires_ansible=requires_ansible
-        ).splitlines()
+        data = ANSIBLE_COMPAT.format(requires_ansible=requires_ansible).splitlines()
         new = content[0 : start + 1] + data + content[end:]
         with open(readme, "w") as fhand:
             fhand.write("\n".join(new))
-        logging.info(
-            "README.md updated with ansible compatibility information"
-        )
+        logging.info("README.md updated with ansible compatibility information")
 
 
 def main():
@@ -596,9 +545,7 @@ def main():
     args = parser.parse_args()
     path = Path(args.path).absolute()
     galaxy = load_galaxy(path=path)
-    collection = "{namespace}.{name}".format(
-        namespace=galaxy["namespace"], name=galaxy["name"]
-    )
+    collection = "{namespace}.{name}".format(namespace=galaxy["namespace"], name=galaxy["name"])
     logging.info("Setting collection name to %s", collection)
     gh_url = galaxy["repository"]
     logging.info("Setting GitHub repository url to %s", gh_url)

@@ -5,6 +5,7 @@ import datetime
 
 from redbaron import RedBaron
 
+
 COLLECTION_MIN_ANSIBLE_VERSION = ">=2.9"
 DEPRECATION_CYCLE_IN_YEAR = 2
 REMOVAL_FREQUENCY_IN_MONTHS = 3
@@ -21,9 +22,7 @@ def get_removed_at_date():
     else:
         depcrecation_month = today.month
 
-    depcrecation_date = (
-        f"{deprecation_year}-{depcrecation_month:02d}-{REMOVAL_DAY_OF_MONTH}"
-    )
+    depcrecation_date = f"{deprecation_year}-{depcrecation_month:02d}-{REMOVAL_DAY_OF_MONTH}"
 
     return depcrecation_date
 

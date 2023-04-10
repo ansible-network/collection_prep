@@ -7,15 +7,15 @@ import platform
 import re
 import subprocess
 import sys
+
 from argparse import ArgumentParser
 
 import ruamel.yaml
 
-from collection_prep.utils import (
-    find_assigment_in_ast,
-    get_removed_at_date,
-    load_py_as_ast,
-)
+from collection_prep.utils import find_assigment_in_ast
+from collection_prep.utils import get_removed_at_date
+from collection_prep.utils import load_py_as_ast
+
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
@@ -56,9 +56,7 @@ def retrieve_plugin_name(plugin_type, bodypart):
     if not bodypart:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return ""
-    documentation = ruamel.yaml.load(
-        bodypart.value.to_python(), ruamel.yaml.RoundTripLoader
-    )
+    documentation = ruamel.yaml.load(bodypart.value.to_python(), ruamel.yaml.RoundTripLoader)
 
     if plugin_type == "modules":
         plugin_type = "module"
@@ -69,9 +67,7 @@ def retrieve_plugin_name(plugin_type, bodypart):
 def update_deprecation_notice(documentation):
     if "deprecated" in documentation:
         logging.info("Updating deprecation notice")
-        documentation["deprecated"].update(
-            {"removed_at_date": get_removed_at_date()}
-        )
+        documentation["deprecated"].update({"removed_at_date": get_removed_at_date()})
         documentation["deprecated"].pop("removed_in", None)
 
 
@@ -84,20 +80,14 @@ def update_documentation(bodypart):
     if not bodypart:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return
-    documentation = ruamel.yaml.load(
-        bodypart.value.to_python(), ruamel.yaml.RoundTripLoader
-    )
+    documentation = ruamel.yaml.load(bodypart.value.to_python(), ruamel.yaml.RoundTripLoader)
 
     # update deprecation to removed_at_date
     update_deprecation_notice(documentation)
 
     # remove version added
     documentation.pop("version_added", None)
-    desc_idx = [
-        idx
-        for idx, key in enumerate(documentation.keys())
-        if key == "description"
-    ]
+    desc_idx = [idx for idx, key in enumerate(documentation.keys()) if key == "description"]
     # insert version_added after the description
     documentation.insert(desc_idx[0] + 1, key="version_added", value="1.0.0")
     repl = ruamel.yaml.dump(documentation, None, ruamel.yaml.RoundTripDumper)
@@ -105,9 +95,7 @@ def update_documentation(bodypart):
     # remove version added from anywhere else in the docstring if preceded by 1+ spaces
     example_lines = repl.splitlines()
     regex = re.compile(r"^\s+version_added\:\s.*$")
-    example_lines = [
-        line for line in example_lines if not re.match(regex, line)
-    ]
+    example_lines = [line for line in example_lines if not re.match(regex, line)]
     bodypart.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
 
 
@@ -123,19 +111,12 @@ def update_examples(bodypart, module_name, collection):
     if not bodypart:
         logging.warning("Failed to find EXAMPLES assignment")
         return
-    full_module_name = "{collection}.{module_name}".format(
-        collection=collection, module_name=module_name
-    )
-    example = ruamel.yaml.load(
-        bodypart.value.to_python(), ruamel.yaml.RoundTripLoader
-    )
+    full_module_name = f"{collection}.{module_name}"
+    example = ruamel.yaml.load(bodypart.value.to_python(), ruamel.yaml.RoundTripLoader)
     # check each task and update to fqcn
     for idx, task in enumerate(example):
         example[idx] = ruamel.yaml.comments.CommentedMap(
-            [
-                (full_module_name, v) if k == module_name else (k, v)
-                for k, v in task.items()
-            ]
+            [(full_module_name, v) if k == module_name else (k, v) for k, v in task.items()]
         )
 
     repl = ruamel.yaml.dump(example, None, ruamel.yaml.RoundTripDumper)
@@ -163,15 +144,11 @@ def update_short_description(retrn, documentation, module_name):
     if not retrn:
         logging.warning("Failed to find RETURN assignment")
         return
-    ret_section = ruamel.yaml.load(
-        retrn.value.to_python(), ruamel.yaml.RoundTripLoader
-    )
+    ret_section = ruamel.yaml.load(retrn.value.to_python(), ruamel.yaml.RoundTripLoader)
     if not documentation:
         logging.warning("Failed to find DOCUMENTATION assignment")
         return
-    doc_section = ruamel.yaml.load(
-        documentation.value.to_python(), ruamel.yaml.RoundTripLoader
-    )
+    doc_section = ruamel.yaml.load(documentation.value.to_python(), ruamel.yaml.RoundTripLoader)
     short_description = doc_section["short_description"]
 
     rm_rets = ["after", "before", "commands"]
@@ -191,17 +168,15 @@ def update_short_description(retrn, documentation, module_name):
                 chars[-1] = chars[-1].lower()
                 resource = "".join(chars)
             if len(parts) > 2 and parts[2] != "global":
-                resource += " {p1}".format(p1=parts[2])
-            short_description = "{resource} resource module".format(
-                resource=resource
-            )
+                resource += f" {parts[2]}"
+            short_description = f"{resource} resource module"
     # Check for deprecated modules
-    if "deprecated" in doc_section and not short_description.startswith(
-        "(deprecated,"
-    ):
+    if "deprecated" in doc_section and not short_description.startswith("(deprecated,"):
         logging.info("Found to be deprecated")
         short_description = short_description.replace("(deprecated) ", "")
-        short_description = f"(deprecated, removed after {get_removed_at_date()}) {short_description}"
+        short_description = (
+            f"(deprecated, removed after {get_removed_at_date()}) {short_description}"
+        )
     # Change short if necessary
     if short_description != doc_section["short_description"]:
         logging.info("Setting short desciption to '%s'", short_description)
@@ -225,9 +200,7 @@ def process(collection, path):
     Process the files in each subdirectory
     """
     for subdir in SUBDIRS:
-        dirpath = "{colpath}{collection}/plugins/{subdir}".format(
-            colpath=path, collection=collection, subdir=subdir
-        )
+        dirpath = f"{path}{collection}/plugins/{subdir}"
         try:
             plugin_files = os.listdir(dirpath)
         except FileNotFoundError:
@@ -236,56 +209,40 @@ def process(collection, path):
 
         for filename in plugin_files:
             if filename.endswith(".py"):
-                filename = "{dirpath}/{filename}".format(
-                    dirpath=dirpath, filename=filename
-                )
+                filename = f"{dirpath}/{filename}"
                 logging.info("-------------------Processing %s", filename)
                 ast_obj = load_py_as_ast(filename)
 
                 # Get the module naem from the docstring
                 module_name = retrieve_plugin_name(
                     subdir,
-                    find_assigment_in_ast(
-                        ast_file=ast_obj, name="DOCUMENTATION"
-                    ),
+                    find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION"),
                 )
                 if not module_name:
-                    logging.warning(
-                        "Skipped %s: No module name found", filename
-                    )
+                    logging.warning("Skipped %s: No module name found", filename)
                     continue
 
                 # Remove the metadata
-                remove_assigment_in_ast(
-                    ast_file=ast_obj, name="ANSIBLE_METADATA"
-                )
+                remove_assigment_in_ast(ast_file=ast_obj, name="ANSIBLE_METADATA")
                 logging.info("Removed metadata in %s", filename)
 
                 # Update the documentation
                 update_documentation(
-                    bodypart=find_assigment_in_ast(
-                        ast_file=ast_obj, name="DOCUMENTATION"
-                    )
+                    bodypart=find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION")
                 )
                 logging.info("Updated documentation in %s", filename)
 
                 if subdir == "modules":
                     # Update the short description
                     update_short_description(
-                        retrn=find_assigment_in_ast(
-                            ast_file=ast_obj, name="RETURN"
-                        ),
-                        documentation=find_assigment_in_ast(
-                            ast_file=ast_obj, name="DOCUMENTATION"
-                        ),
+                        retrn=find_assigment_in_ast(ast_file=ast_obj, name="RETURN"),
+                        documentation=find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION"),
                         module_name=module_name,
                     )
 
                     # Update the examples
                     update_examples(
-                        bodypart=find_assigment_in_ast(
-                            ast_file=ast_obj, name="EXAMPLES"
-                        ),
+                        bodypart=find_assigment_in_ast(ast_file=ast_obj, name="EXAMPLES"),
                         module_name=module_name,
                         collection=collection,
                     )
@@ -306,12 +263,8 @@ def main():
     if not platform.python_version().startswith("3.8"):
         sys.exit("Python 3.8+ required")
     parser = ArgumentParser()
-    parser.add_argument(
-        "-c", "--collection", help="The name of the collection", required=True
-    )
-    parser.add_argument(
-        "-p", "--path", help="The path to the collection", required=True
-    )
+    parser.add_argument("-c", "--collection", help="The name of the collection", required=True)
+    parser.add_argument("-p", "--path", help="The path to the collection", required=True)
     args = parser.parse_args()
     process(collection=args.collection, path=args.path)
 

@@ -4,17 +4,15 @@ Get ready for 1.0.0
 import glob
 import logging
 import os
-import platform
-import sys
+
 from argparse import ArgumentParser
 
 import ruamel.yaml
 
-from collection_prep.utils import (
-    find_assigment_in_ast,
-    get_removed_at_date,
-    load_py_as_ast,
-)
+from collection_prep.utils import find_assigment_in_ast
+from collection_prep.utils import get_removed_at_date
+from collection_prep.utils import load_py_as_ast
+
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
@@ -48,17 +46,11 @@ def process_runtime_plugin_routing(collection, path):
 
         module_name = filename.split(".")[0]
 
-        logging.info(
-            f"-------------------Processing runtime.yml for module {module_name}"
-        )
+        logging.info(f"-------------------Processing runtime.yml for module {module_name}")
 
         ast_obj = load_py_as_ast(fullpath)
-        documentation = find_assigment_in_ast(
-            ast_file=ast_obj, name="DOCUMENTATION"
-        )
-        doc_section = ruamel.yaml.load(
-            documentation.value.to_python(), ruamel.yaml.RoundTripLoader
-        )
+        documentation = find_assigment_in_ast(ast_file=ast_obj, name="DOCUMENTATION")
+        doc_section = ruamel.yaml.load(documentation.value.to_python(), ruamel.yaml.RoundTripLoader)
 
         try:
             module_prefix = module_name.split("_")[0]
@@ -72,20 +64,14 @@ def process_runtime_plugin_routing(collection, path):
         # by design will invoke action plugin first.
         if not os.path.exists(os.path.join(action_path, f"{module_name}.py")):
             if (
-                os.path.exists(
-                    os.path.join(action_path, f"{module_prefix}.py")
-                )
+                os.path.exists(os.path.join(action_path, f"{module_prefix}.py"))
                 and module_prefix == collection_name
             ):
                 fq_action_name = f"{collection}.{module_prefix}"
                 if not plugin_routing.get("action"):
                     plugin_routing["action"] = {}
-                plugin_routing["action"].update(
-                    {module_name: {"redirect": fq_action_name}}
-                )
-                plugin_routing["action"].update(
-                    {short_name: {"redirect": fq_action_name}}
-                )
+                plugin_routing["action"].update({module_name: {"redirect": fq_action_name}})
+                plugin_routing["action"].update({short_name: {"redirect": fq_action_name}})
 
         # handle module short name redirection.
         # Add short redirection if module prefix and collection name is same
@@ -95,9 +81,7 @@ def process_runtime_plugin_routing(collection, path):
             fq_module_name = f"{collection}.{module_name}"
             if not plugin_routing.get("modules"):
                 plugin_routing["modules"] = {}
-            plugin_routing["modules"].update(
-                {short_name: {"redirect": fq_module_name}}
-            )
+            plugin_routing["modules"].update({short_name: {"redirect": fq_module_name}})
 
         # handle module deprecation notice
         if "deprecated" in doc_section:
@@ -109,9 +93,7 @@ def process_runtime_plugin_routing(collection, path):
                     module_name: {
                         "deprecation": {
                             "removal_date": get_removed_at_date(),
-                            "warning_text": get_warning_msg(
-                                f"{collection}.{module_name}"
-                            ),
+                            "warning_text": get_warning_msg(f"{collection}.{module_name}"),
                         }
                     }
                 }
@@ -124,9 +106,7 @@ def process_runtime_plugin_routing(collection, path):
                     {
                         "deprecation": {
                             "removal_date": get_removed_at_date(),
-                            "warning_text": get_warning_msg(
-                                f"{collection}.{short_name}"
-                            ),
+                            "warning_text": get_warning_msg(f"{collection}.{short_name}"),
                         }
                     }
                 )
@@ -167,12 +147,8 @@ def main():
     The entry point
     """
     parser = ArgumentParser()
-    parser.add_argument(
-        "-c", "--collection", help="The name of the collection", required=True
-    )
-    parser.add_argument(
-        "-p", "--path", help="The path to the collection", required=True
-    )
+    parser.add_argument("-c", "--collection", help="The name of the collection", required=True)
+    parser.add_argument("-p", "--path", help="The path to the collection", required=True)
     args = parser.parse_args()
     process(collection=args.collection, path=args.path)
 
