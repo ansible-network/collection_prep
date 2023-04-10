@@ -1,6 +1,27 @@
 [tool.black]
-line-length = 79
+line-length = 100
 
-[tool.isort]
-profile = "black"
-line_length = 79
+[tool.ruff]
+line-length = 100
+select = [
+  "E", # pycodestyle
+  "F", # pyflakes
+  "I", # isort
+  "UP", # pyupgrade
+  "W", # pycodestyle
+  "YTT", # flake8-2020
+
+]
+builtins = ["_"]
+target-version = "py39"
+
+[tool.ruff.isort]
+force-single-line = true # Force from .. import to be 1 per line, minimizing changes at time of implementation
+lines-after-imports = 2 # Ensures consistency for cases when there's variable vs function/class definitions after imports
+lines-between-types = 1 # Separate import/from with 1 line, minimizing changes at time of implementation
+no-lines-before = [
+  "local-folder"
+] # Keeps local imports bundled with first-party
+
+[tool.ruff.pydocstyle]
+convention = "google"

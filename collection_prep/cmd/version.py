@@ -1,9 +1,11 @@
 import logging
 import sys
+
 from argparse import ArgumentParser
 from pathlib import Path
 
 import ruamel.yaml
+
 
 yaml = ruamel.yaml.YAML()
 # Preserve document layout

@@ -1,10 +1,12 @@
 import re
+
 from html import escape as html_escape
 
 from ansible.errors import AnsibleError
 from ansible.module_utils._text import to_text
 from ansible.module_utils.six import string_types
 from jinja2.runtime import Undefined
+
 
 NS_MAP = {}
 
@@ -56,7 +58,7 @@ def rst_ify(text):
         t = _CONST.sub(r"``\1``", t)
         t = _RULER.sub(r"------------", t)
     except Exception as e:
-        raise AnsibleError("Could not process (%s) : %s" % (text, e))
+        raise AnsibleError(f"Could not process ({text}) : {e}")
 
     return t
 
