@@ -105,7 +105,9 @@ def update_documentation(bodypart):
     # remove version added from anywhere else in the docstring if preceded by 1+ spaces
     example_lines = repl.splitlines()
     regex = re.compile(r"^\s+version_added\:\s.*$")
-    example_lines = [l for l in example_lines if not re.match(regex, l)]
+    example_lines = [
+        line for line in example_lines if not re.match(regex, line)
+    ]
     bodypart.value.replace('"""\n' + "\n".join(example_lines) + '\n"""')
 
 

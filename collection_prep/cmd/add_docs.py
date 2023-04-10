@@ -137,6 +137,7 @@ def update_readme(content, path, gh_url, branch_name):
     :type branch_name: str
     """
     data = []
+    gh_url = re.sub(r"\.git$", "", gh_url)
     for plugin_type, plugins in content.items():
         logging.info("Processing '%s' for README", plugin_type)
         if not plugins:
@@ -156,11 +157,11 @@ def update_readme(content, path, gh_url, branch_name):
         data.append("--- | ---")
         for plugin, info in sorted(plugins.items()):
             if info["has_rst"]:
-                link = "[{plugin}]({gh_url}/blob/{branch_name}/docs/{plugin}_{plugin_type}.rst)".format(
-                    branch_name=branch_name,
-                    gh_url=re.sub(r"\.git$", "", gh_url),
-                    plugin=plugin,
-                    plugin_type=plugin_type.replace("modules", "module"),
+                link = (
+                    f"[{plugin}]({gh_url}/blob/{branch_name}/docs/{plugin}_"
+                    "{plugin_type}.rst)".format(
+                        plugin_type=plugin_type.replace("modules", "module"),
+                    )
                 )
             else:
                 link = plugin
@@ -263,7 +264,8 @@ def handle_simple(collection, fullpath, kind):
         if not simple_func:
             return plugins
 
-        # The filter map is either looked up using the filter_map = {} assignment or if return returns a dict literal.
+        # The filter map is either looked up using the filter_map = {}
+        # assignment or if return returns a dict literal.
         simple_map = next(
             (
                 node
@@ -289,7 +291,8 @@ def handle_simple(collection, fullpath, kind):
                 collection=collection, name=name, kind=kind
             )
 
-            # Get the first line from the docstring for the description and make that the short description.
+            # Get the first line from the docstring for the description and
+            # make that the short description.
             comment = next(
                 c for c in comment.splitlines() if c and not c.startswith(":")
             )
@@ -354,7 +357,8 @@ def process(
                             doc["plugin_type"] = plugin_type
 
                             if returndocs:
-                                # Seems a recent change in devel makes this return a dict not a yaml string.
+                                # Seems a recent change in devel makes this
+                                # return a dict not a yaml string.
                                 if isinstance(returndocs, dict):
                                     doc["returndocs"] = returndocs
                                 else:
