@@ -22,6 +22,7 @@ nthhost
 ospfv
 slaac
 # Python packages
+antsibull
 argcomplete
 redbaron
 ruamel
