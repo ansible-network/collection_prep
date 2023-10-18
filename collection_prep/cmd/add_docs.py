@@ -119,7 +119,7 @@ def jinja_environment():
     return template
 
 
-def update_readme(content, path, gh_url, branch_name):
+def update_readme(content, path, gh_url, branch_name):  # pylint: disable-msg=too-many-locals
     """Update the README.md in the repository.
 
     :param content: The dict containing the content
@@ -150,23 +150,17 @@ def update_readme(content, path, gh_url, branch_name):
             if info["has_rst"]:
                 link = (
                     f"[{plugin}]({gh_url}/blob/{branch_name}/docs/{plugin}_"
-                    "{plugin_type}.rst)".format(
-                        plugin_type=plugin_type.replace("modules", "module"),
-                    )
+                    f"{plugin_type.replace('modules', 'module')}.rst)"
                 )
             else:
                 link = plugin
-            data.append(
-                "{link}|{description}".format(
-                    link=link,
-                    description=info["comment"].replace("|", "\\|").strip(),
-                )
-            )
+            description = info["comment"].replace("|", "\\|").strip()
+            data.append(f"{link}|{description}")
         data.append("")
     readme = os.path.join(path, "README.md")
     try:
-        with open(readme) as f:
-            content = f.read().splitlines()
+        with open(readme, encoding="utf8") as readme_file:
+            content = readme_file.read().splitlines()
     except FileNotFoundError:
         logging.error("README.md not found in %s", path)
         logging.error("README.md not updated")
@@ -180,16 +174,16 @@ def update_readme(content, path, gh_url, branch_name):
         sys.exit(1)
     if start and end:
         new = content[0 : start + 1] + data + content[end:]
-        with open(readme, "w") as fhand:
-            fhand.write("\n".join(new))
+        with open(readme, "w", encoding="utf8") as readme_file:
+            readme_file.write("\n".join(new))
             # Avoid "No newline at end of file.
             # No, I don't know why it has to be two of them.
             # Yes, it actually does have to be two of them.
-            fhand.write("\n\n")
+            readme_file.write("\n\n")
         logging.info("README.md updated")
 
 
-def handle_simple(collection, fullpath, kind):
+def handle_simple(collection, fullpath, kind):  # pylint: disable-msg=too-many-locals
     """Process "simple" plugins like filter or test.
 
     :param collection: The full collection name
@@ -213,28 +207,28 @@ def handle_simple(collection, fullpath, kind):
         sys.exit(1)
 
     plugins = {}
-    with open(fullpath) as fhand:
-        file_contents = fhand.read()
+    with open(fullpath, encoding="utf8") as file_obj:
+        file_contents = file_obj.read()
     module = ast.parse(file_contents)
     function_definitions = {
         node.name: ast.get_docstring(node)
         for node in module.body
         if isinstance(node, ast.FunctionDef)
     }
-    classdef = [
+    class_def = [
         node for node in module.body if isinstance(node, ast.ClassDef) and node.name == class_name
     ]
-    if not classdef:
+    if not class_def:
         return plugins
-    else:
-        docstring = ast.get_docstring(classdef[0], clean=True)
-        if docstring:
-            plugins["_description"] = docstring.strip()
+
+    docstring = ast.get_docstring(class_def[0], clean=True)
+    if docstring:
+        plugins["_description"] = docstring.strip()
 
     simple_map = next(
         (
             node
-            for node in classdef[0].body
+            for node in class_def[0].body
             if isinstance(node, ast.Assign)
             and hasattr(node, "targets")
             and node.targets[0].id == map_name
@@ -245,7 +239,7 @@ def handle_simple(collection, fullpath, kind):
     if not simple_map:
         simple_func = [
             func
-            for func in classdef[0].body
+            for func in class_def[0].body
             if isinstance(func, ast.FunctionDef) and func.name == func_name
         ]
         if not simple_func:
@@ -280,7 +274,7 @@ def handle_simple(collection, fullpath, kind):
     return plugins
 
 
-def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
+def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals,too-many-branches
     """Process the files in each subdirectory.
 
     :param collection: The collection name
@@ -300,7 +294,7 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
 
     content = {}
 
-    for subdir in SUBDIRS:
+    for subdir in SUBDIRS:  # pylint: disable-msg=too-many-nested-blocks
         if subdir == "modules":
             plugin_type = "module"
         else:
@@ -317,7 +311,7 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
                     (
                         doc,
                         examples,
-                        returndocs,
+                        return_docs,
                         metadata,
                     ) = plugin_docs.get_docstring(to_text(fullpath), fragment_loader)
                     if doc is None and subdir in ["filter", "test"]:
@@ -328,24 +322,23 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
                         if doc:
                             doc["plugin_type"] = plugin_type
 
-                            if returndocs:
+                            if return_docs:
                                 # Seems a recent change in devel makes this
                                 # return a dict not a yaml string.
-                                if isinstance(returndocs, dict):
-                                    doc["returndocs"] = returndocs
+                                if isinstance(return_docs, dict):
+                                    doc["return_docs"] = return_docs
                                 else:
-                                    doc["returndocs"] = yaml.safe_load(returndocs)
-                                convert_descriptions(doc["returndocs"])
+                                    doc["return_docs"] = yaml.safe_load(return_docs)
+                                convert_descriptions(doc["return_docs"])
 
                             doc["metadata"] = (metadata,)
                             if isinstance(examples, string_types):
-                                doc["plainexamples"] = examples.strip()
+                                doc["plain_examples"] = examples.strip()
                             else:
                                 doc["examples"] = examples
 
-                            doc["module"] = "{collection}.{plugin_name}".format(
-                                collection=collection,
-                                plugin_name=doc.get(plugin_type, doc.get("name")),
+                            doc["module"] = f"{collection}." "{plugin_name}".format(
+                                plugin_name=doc.get(plugin_type, doc.get("name"))
                             )
                             doc["author"] = ensure_list(doc["author"])
                             doc["description"] = ensure_list(doc["description"])
@@ -360,8 +353,8 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
                                 doc["module"] + f"_{plugin_type}" + ".rst",
                             )
 
-                            with open(module_rst_path, "w") as fd:
-                                fd.write(template.render(doc))
+                            with open(module_rst_path, "w", encoding="utf8") as doc_file:
+                                doc_file.write(template.render(doc))
                             content[subdir][doc["module"]] = {
                                 "has_rst": True,
                                 "comment": doc["short_description"],
@@ -376,7 +369,7 @@ def load_galaxy(path):
     :return: The collection name and gh url
     """
     try:
-        with open(Path(path, "galaxy.yml")) as stream:
+        with open(Path(path, "galaxy.yml"), encoding="utf8") as stream:
             try:
                 return yaml.safe_load(stream)
             except yaml.YAMLError:
@@ -394,7 +387,7 @@ def load_runtime(path):
     :return: The runtime dict
     """
     try:
-        with open(Path(path, "meta/runtime.yml")) as stream:
+        with open(Path(path, "meta/runtime.yml"), encoding="utf8") as stream:
             try:
                 return yaml.safe_load(stream)
             except yaml.YAMLError:
@@ -430,7 +423,7 @@ def link_collection(path: Path, galaxy: dict, collection_root: Optional[Path] = 
             logging.info("Unlinking: %s", collection_directory)
             collection_directory.unlink()
         else:
-            logging.info("Deleteing: %s", collection_directory)
+            logging.info("Deleting: %s", collection_directory)
             shutil.rmtree(collection_directory)
 
     logging.info("Creating namespace directory %s", namespace_directory)
@@ -461,7 +454,7 @@ def add_collection(path: Path, galaxy: dict) -> Optional[tempfile.TemporaryDirec
         collections_path = None
 
     if collections_path is None:
-        tempdir = tempfile.TemporaryDirectory()
+        tempdir = tempfile.TemporaryDirectory()  # pylint: disable-msg=consider-using-with
         logging.info("Temporary collection path %s created", tempdir.name)
         collections_path = Path(tempdir.name) / "ansible_collections"
         link_collection(path, galaxy, collection_root=collections_path)
@@ -470,7 +463,9 @@ def add_collection(path: Path, galaxy: dict) -> Optional[tempfile.TemporaryDirec
     logging.info("Collection path is %s", full_path)
 
     # Tell ansible about the path
-    _AnsibleCollectionFinder(paths=[collections_path, "~/.ansible/collections"])._install()
+    _AnsibleCollectionFinder(  # pylint: disable-msg=protected-access
+        paths=[collections_path, "~/.ansible/collections"]
+    )._install()
 
     # This object has to outlive this method or it will be cleaned up before
     # we can use it
@@ -491,8 +486,8 @@ def add_ansible_compatibility(runtime, path):
         return
     readme = os.path.join(path, "README.md")
     try:
-        with open(readme) as f:
-            content = f.read().splitlines()
+        with open(readme, encoding="utf8") as readme_file:
+            content = readme_file.read().splitlines()
     except FileNotFoundError:
         logging.error("README.md not found in %s", path)
         logging.error("README.md not updated")
@@ -507,8 +502,8 @@ def add_ansible_compatibility(runtime, path):
     if start and end:
         data = ANSIBLE_COMPAT.format(requires_ansible=requires_ansible).splitlines()
         new = content[0 : start + 1] + data + content[end:]
-        with open(readme, "w") as fhand:
-            fhand.write("\n".join(new))
+        with open(readme, "w", encoding="utf8") as readme_file:
+            readme_file.write("\n".join(new))
         logging.info("README.md updated with ansible compatibility information")
 
 
@@ -541,7 +536,7 @@ def main():
     args = parser.parse_args()
     path = Path(args.path).absolute()
     galaxy = load_galaxy(path=path)
-    collection = "{namespace}.{name}".format(namespace=galaxy["namespace"], name=galaxy["name"])
+    collection = f"{galaxy['namespace']}.{galaxy['name']}"
     logging.info("Setting collection name to %s", collection)
     gh_url = galaxy["repository"]
     logging.info("Setting GitHub repository url to %s", gh_url)

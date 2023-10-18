@@ -70,11 +70,13 @@ def update_version(path: Path, version: str) -> str:
     if fragment_path.exists() and fragment_path.is_dir():
         for file in fragment_path.iterdir():
             fragment = yaml.load(file)
-            if fragment:
-                for level, headings in RULES.items():
-                    for heading in headings:
-                        if heading in fragment:
-                            types[level] = True
+            if not fragment:
+                continue
+
+            for level, headings in RULES.items():
+                for heading in headings:
+                    if heading in fragment:
+                        types[level] = True
 
     # Bump version accordingly
     if types["major"]:

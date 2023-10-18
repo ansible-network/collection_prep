@@ -18,15 +18,15 @@ def get_removed_at_date():
     today = datetime.date.today()
     deprecation_year = today.year + DEPRECATION_CYCLE_IN_YEAR
     if today.month % REMOVAL_FREQUENCY_IN_MONTHS:
-        depcrecation_month = (today.month + REMOVAL_FREQUENCY_IN_MONTHS) - (
+        deprecation_month = (today.month + REMOVAL_FREQUENCY_IN_MONTHS) - (
             today.month % REMOVAL_FREQUENCY_IN_MONTHS
         )
     else:
-        depcrecation_month = today.month
+        deprecation_month = today.month
 
-    depcrecation_date = f"{deprecation_year}-{depcrecation_month:02d}-{REMOVAL_DAY_OF_MONTH}"
+    deprecation_date = f"{deprecation_year}-{deprecation_month:02d}-{REMOVAL_DAY_OF_MONTH}"
 
-    return depcrecation_date
+    return deprecation_date
 
 
 def load_py_as_ast(path):
@@ -35,16 +35,16 @@ def load_py_as_ast(path):
     :param path: The full path to the file
     :return: The ast object
     """
-    with open(path) as file:
+    with open(path, encoding="utf8") as file:
         data = file.read()
         red = RedBaron(data)
     return red
 
 
-def find_assigment_in_ast(name, ast_file):
+def find_assignment_in_ast(name, ast_file):
     """Find an assignment in an ast object.
 
-    :param name: The name of the assignement to find
+    :param name: The name of the assignment to find
     :param ast_file: The ast object
     :return: A list of ast object matching
     """
