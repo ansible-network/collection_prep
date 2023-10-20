@@ -142,7 +142,7 @@ Parameters
                                     {% if (value.default is not list and value.default == choice) or (value.default is list and choice in value.default) %}
                                         <li><div style="color: blue"><b>@{ choice | escape }@</b>:&nbsp;@{ value.choices[choice] | escape }@&larr;</div></li>
                                     {% else %}
-                                        <li>@{ choice | escape }@:&nbsp;@{ value.choices[chioce] }@</li>
+                                        <li>@{ choice | escape }@:&nbsp;@{ value.choices[choice] | escape }@</li>
                                     {% endif %}
                                 {% endfor %}
                             {% else %}
