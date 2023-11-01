@@ -120,7 +120,7 @@ Parameters
                         {% endif %}
                     </div>
                     {% if value.version_added %}
-                    <div style="font-style: italic; font-size: small; color: darkgreen">added in @{value.version_added}@</div>
+                    <div style="font-style: italic; font-size: small; color: darkgreen">added in @{value.version_added}@ {% if value.version_added_collection %}of @{value.version_added_collection}@{% endif %}</div>
                     {% endif %}
                 </td>
                 {# default / choices #}
@@ -299,7 +299,7 @@ Facts returned by this module are added/updated in the ``hostvars`` host facts a
                       {% endif %}
                     </div>
                     {% if value.version_added %}
-                    <div style="font-style: italic; font-size: small; color: darkgreen">added in @{value.version_added}@</div>
+                    <div style="font-style: italic; font-size: small; color: darkgreen">added in @{value.version_added}@ {% if value.version_added_collection %}of @{value.version_added_collection}@{% endif %}</div>
                     {% endif %}
                 </td>
                 <td>@{ value.returned | html_ify }@</td>
@@ -380,7 +380,7 @@ Common return values are documented `here <https://docs.ansible.com/ansible/late
                       {% endif %}
                     </div>
                     {% if value.version_added %}
-                    <div style="font-style: italic; font-size: small; color: darkgreen">added in @{value.version_added}@</div>
+                    <div style="font-style: italic; font-size: small; color: darkgreen">added in @{value.version_added}@ {% if value.version_added_collection %}of @{value.version_added_collection}@{% endif %}</div>
                     {% endif %}
                 </td>
                 <td>@{ value.returned | html_ify }@</td>
