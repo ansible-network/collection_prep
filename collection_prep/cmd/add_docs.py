@@ -59,7 +59,7 @@ SUBDIRS = (
 TEMPLATE_DIR = os.path.dirname(__file__)
 ANSIBLE_COMPAT = """## Ansible version compatibility
 
-This collection has been tested against following Ansible versions: **{requires_ansible}**.
+This collection has been tested against the following Ansible versions: **{requires_ansible}**.
 
 Plugins and modules within a collection may be tested with only specific Ansible versions.
 A collection may contain metadata that identifies these versions.
