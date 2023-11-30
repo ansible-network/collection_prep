@@ -335,10 +335,8 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
                             else:
                                 doc["examples"] = examples
 
-                            doc["module"] = (
-                                f"{collection}." "{plugin_name}".format(
-                                    plugin_name=doc.get(plugin_type, doc.get("name"))
-                                )
+                            doc["module"] = f"{collection}." "{plugin_name}".format(
+                                plugin_name=doc.get(plugin_type, doc.get("name"))
                             )
                             doc["author"] = ensure_list(doc["author"])
                             doc["description"] = ensure_list(doc["description"])
