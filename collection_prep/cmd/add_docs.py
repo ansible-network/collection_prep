@@ -61,8 +61,6 @@ ANSIBLE_COMPAT = """## Ansible version compatibility
 
 This collection has been tested against following Ansible versions: **{requires_ansible}**.
 
-For collections that support Ansible 2.9, please ensure you update your `network_os` to use the
-fully qualified collection name (for example, `cisco.ios.ios`).
 Plugins and modules within a collection may be tested with only specific Ansible versions.
 A collection may contain metadata that identifies these versions.
 PEP440 is the schema used to describe the versions of Ansible.
@@ -337,8 +335,10 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
                             else:
                                 doc["examples"] = examples
 
-                            doc["module"] = f"{collection}." "{plugin_name}".format(
-                                plugin_name=doc.get(plugin_type, doc.get("name"))
+                            doc["module"] = (
+                                f"{collection}." "{plugin_name}".format(
+                                    plugin_name=doc.get(plugin_type, doc.get("name"))
+                                )
                             )
                             doc["author"] = ensure_list(doc["author"])
                             doc["description"] = ensure_list(doc["description"])
