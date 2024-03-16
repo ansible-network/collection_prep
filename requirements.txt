@@ -1,3 +1,4 @@
 ansible-core
 redbaron
 ruamel.yaml
+antsibull-docs-parser >= 1.0.0, < 2.0.0
