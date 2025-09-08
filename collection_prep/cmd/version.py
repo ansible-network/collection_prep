@@ -1,4 +1,5 @@
 """Script to guess the next version of an ansible collection."""
+
 import logging
 import sys
 
