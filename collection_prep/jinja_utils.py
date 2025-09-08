@@ -1,4 +1,5 @@
 """Utilities for jinja2."""
+
 import re
 
 from html import escape as html_escape
