@@ -14,8 +14,8 @@ from collection_prep.utils import load_py_as_ast
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
-COLLECTION_MIN_ANSIBLE_VERSION = ">=2.9.10"
-COLLECTION_MAX_ANSIBLE_VERSION = "<2.11"
+COLLECTION_MIN_ANSIBLE_VERSION = ">=2.14.10"
+COLLECTION_MAX_ANSIBLE_VERSION = "<2.19"
 DEPRECATION_CYCLE_IN_YEAR = 2
 REMOVAL_FREQUENCY_IN_MONTHS = 3
 REMOVAL_DAY_OF_MONTH = "01"
