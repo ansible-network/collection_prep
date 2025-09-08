@@ -1,7 +1,7 @@
 ---
 repos:
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.261"
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.12.12"
     hooks:
       - id: ruff
         args:
@@ -9,7 +9,7 @@ repos:
           - "--exit-non-zero-on-fix"
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: "v3.0.0-alpha.6"
+    rev: "v4.0.0-alpha.8"
     hooks:
       - id: prettier
         additional_dependencies:
@@ -17,23 +17,23 @@ repos:
           - prettier-plugin-toml
 
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 25.1.0
     hooks:
       - id: black
 
   - repo: https://github.com/streetsidesoftware/cspell-cli
-    rev: v6.31.0
+    rev: v9.2.0
     hooks:
       - id: cspell
         name: Spell check with cspell
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.4.2
+    rev: v1.5.5
     hooks:
       - id: remove-tabs
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v6.0.0
     hooks:
       - id: check-merge-conflict
       - id: check-symlinks
@@ -44,12 +44,12 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.4
+    rev: v2.4.1
     hooks:
       - id: codespell
 
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.30.0
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args:
@@ -62,7 +62,7 @@ repos:
       - id: darglint
 
   - repo: https://github.com/pycqa/pylint
-    rev: v2.17.1
+    rev: v3.3.8
     hooks:
       - id: pylint
         additional_dependencies:
