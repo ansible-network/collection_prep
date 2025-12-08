@@ -17,7 +17,11 @@ from typing import Optional
 
 import yaml
 
-from ansible.module_utils._text import to_text
+
+try:
+    from ansible.module_utils.common.text.converters import to_text
+except ImportError:
+    from ansible.module_utils._text import to_text
 from ansible.module_utils.common.collections import is_sequence
 from ansible.module_utils.six import string_types
 from ansible.plugins.loader import fragment_loader
@@ -462,7 +466,7 @@ def add_collection(path: Path, galaxy: dict) -> Optional[tempfile.TemporaryDirec
 
     # Tell ansible about the path
     _AnsibleCollectionFinder(  # pylint: disable-msg=protected-access
-        paths=[collections_path, "~/.ansible/collections"]
+        paths=[to_text(collections_path), "~/.ansible/collections"]
     )._install()
 
     # This object has to outlive this method or it will be cleaned up before
