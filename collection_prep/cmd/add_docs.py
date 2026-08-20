@@ -2,6 +2,7 @@
 # PYTHON_ARGCOMPLETE_OK
 
 """Generate or update collection documentation."""
+
 import ast
 import logging
 import os
@@ -17,8 +18,8 @@ from typing import Optional
 
 import yaml
 
-from ansible.module_utils._text import to_text
 from ansible.module_utils.common.collections import is_sequence
+from ansible.module_utils.common.text.converters import to_text
 from ansible.module_utils.six import string_types
 from ansible.plugins.loader import fragment_loader
 from ansible.utils import plugin_docs
@@ -31,7 +32,6 @@ from collection_prep.jinja_utils import from_kludge_ns
 from collection_prep.jinja_utils import html_ify
 from collection_prep.jinja_utils import rst_ify
 from collection_prep.jinja_utils import to_kludge_ns
-
 
 try:
     import argcomplete

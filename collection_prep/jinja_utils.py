@@ -1,12 +1,12 @@
 """Utilities for jinja2."""
+
 import re
 
 from html import escape as html_escape
 
-from ansible.module_utils._text import to_text
+from ansible.module_utils.common.text.converters import to_text
 from ansible.module_utils.six import string_types
 from jinja2.runtime import Undefined
-
 
 NS_MAP = {}
 
