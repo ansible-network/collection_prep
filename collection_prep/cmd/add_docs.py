@@ -2,6 +2,7 @@
 # PYTHON_ARGCOMPLETE_OK
 
 """Generate or update collection documentation."""
+
 import ast
 import logging
 import os
@@ -93,6 +94,23 @@ def convert_descriptions(data):
                 convert_descriptions(definition["suboptions"])
             if "contains" in definition:
                 convert_descriptions(definition["contains"])
+
+
+def add_full_key(options, parent_key=None):
+    """Walk the options/return tree and set full_key on each entry.
+
+    full_key is a list of key names from root to leaf, used by the
+    RST template to build unique HTML anchor IDs.
+    """
+    if not options:
+        return
+    for key, value in options.items():
+        full_key = (parent_key or []) + [key]
+        value["full_key"] = full_key
+        if "suboptions" in value:
+            add_full_key(value["suboptions"], full_key)
+        if "contains" in value:
+            add_full_key(value["contains"], full_key)
 
 
 def jinja_environment():
@@ -328,6 +346,7 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
                                 else:
                                     doc["return_docs"] = yaml.safe_load(return_docs)
                                 convert_descriptions(doc["return_docs"])
+                                add_full_key(doc["return_docs"])
 
                             doc["metadata"] = (metadata,)
                             if isinstance(examples, string_types):
@@ -342,6 +361,7 @@ def process(collection: str, path: Path):  # pylint: disable-msg=too-many-locals
                             doc["description"] = ensure_list(doc["description"])
                             try:
                                 convert_descriptions(doc["options"])
+                                add_full_key(doc["options"])
                             except KeyError:
                                 pass  # This module takes no options
 
