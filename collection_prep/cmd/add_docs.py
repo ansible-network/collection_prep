@@ -17,8 +17,8 @@ from typing import Optional
 
 import yaml
 
-from ansible.module_utils._text import to_text
 from ansible.module_utils.common.collections import is_sequence
+from ansible.module_utils.common.text.converters import to_text
 from ansible.module_utils.six import string_types
 from ansible.plugins.loader import fragment_loader
 from ansible.utils import plugin_docs
