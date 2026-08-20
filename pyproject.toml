@@ -8,6 +8,10 @@ max-line-length = 100
 
 [tool.pylint.master]
 no-docstring-rgx = "__.*__"
+# ruamel.yaml's deprecated top-level load/dump helpers are typed as returning
+# None, which makes pylint emit spurious no-return/unsubscriptable errors on the
+# parsed results. Skip member inference for the package to avoid the noise.
+ignored-modules = ["ruamel.yaml"]
 
 [tool.pylint.messages_control]
 disable = ["duplicate-code", "fixme"]
@@ -18,6 +22,10 @@ enable = [
 
 [tool.ruff]
 line-length = 100
+builtins = ["_"]
+target-version = "py39"
+
+[tool.ruff.lint]
 select = [
   "D", # pydocstyle
   "E", # pycodestyle
@@ -28,16 +36,14 @@ select = [
   "YTT", # flake8-2020
 
 ]
-builtins = ["_"]
-target-version = "py39"
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 force-single-line = true # Force from .. import to be 1 per line, minimizing changes at time of implementation
-lines-after-imports = 2 # Ensures consistency for cases when there's variable vs function/class definitions after imports
+lines-after-imports = -1 # Let ruff match black: 2 blank lines before a def/class, 1 before a plain statement
 lines-between-types = 1 # Separate import/from with 1 line, minimizing changes at time of implementation
 no-lines-before = [
   "local-folder"
 ] # Keeps local imports bundled with first-party
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
