@@ -137,19 +137,29 @@ Parameters
                     {# Show possible choices and highlight details #}
                     {% if value.choices %}
                         <ul style="margin: 0; padding: 0"><b>Choices:</b>
-                            {% for choice in value.choices %}
-                                {# Turn boolean values in 'yes' and 'no' values #}
-                                {% if choice is sameas true %}
-                                    {% set choice = 'yes' %}
-                                {% elif choice is sameas false %}
-                                    {% set choice = 'no' %}
-                                {% endif %}
-                                {% if (value.default is not list and value.default == choice) or (value.default is list and choice in value.default) %}
-                                    <li><div style="color: blue"><b>@{ choice | escape }@</b>&nbsp;&larr;</div></li>
-                                {% else %}
-                                    <li>@{ choice | escape }@</li>
-                                {% endif %}
-                            {% endfor %}
+                            {% if value.choices is mapping %}
+                                {% for choice in value.choices.keys() %}
+                                    {% if (value.default is not list and value.default == choice) or (value.default is list and choice in value.default) %}
+                                        <li><div style="color: blue"><b>@{ choice | escape }@</b>:&nbsp;@{ value.choices[choice] | escape }@&larr;</div></li>
+                                    {% else %}
+                                        <li>@{ choice | escape }@:&nbsp;@{ value.choices[choice] | escape }@</li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {% for choice in value.choices %}
+                                    {# Turn boolean values in 'yes' and 'no' values #}
+                                    {% if choice is sameas true %}
+                                        {% set choice = 'yes' %}
+                                    {% elif choice is sameas false %}
+                                        {% set choice = 'no' %}
+                                    {% endif %}
+                                    {% if (value.default is not list and value.default == choice) or (value.default is list and choice in value.default) %}
+                                        <li><div style="color: blue"><b>@{ choice | escape }@</b>&nbsp;&larr;</div></li>
+                                    {% else %}
+                                        <li>@{ choice | escape }@</li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
                         </ul>
                     {% endif %}
                     {# Show default value, when multiple choice or no choices #}
