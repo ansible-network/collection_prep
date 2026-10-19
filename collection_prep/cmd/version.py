@@ -1,4 +1,5 @@
 """Script to guess the next version of an ansible collection."""
+
 import logging
 import sys
 
@@ -6,7 +7,6 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import ruamel.yaml
-
 
 yaml = ruamel.yaml.YAML()
 # Preserve document layout

@@ -2,6 +2,7 @@
 # PYTHON_ARGCOMPLETE_OK
 
 """Generate or update collection documentation."""
+
 import ast
 import logging
 import os
@@ -31,7 +32,6 @@ from collection_prep.jinja_utils import from_kludge_ns
 from collection_prep.jinja_utils import html_ify
 from collection_prep.jinja_utils import rst_ify
 from collection_prep.jinja_utils import to_kludge_ns
-
 
 try:
     import argcomplete
