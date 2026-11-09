@@ -1,4 +1,5 @@
 """Get ready for 1.0.0."""
+
 import glob
 import logging
 import os
@@ -10,7 +11,6 @@ import ruamel.yaml
 from collection_prep.utils import find_assignment_in_ast
 from collection_prep.utils import get_removed_at_date
 from collection_prep.utils import load_py_as_ast
-
 
 logging.basicConfig(format="%(levelname)-10s%(message)s", level=logging.INFO)
 
