@@ -1,8 +1,8 @@
 """Get ready for 1.0.0."""
+
 import datetime
 
 from redbaron import RedBaron
-
 
 COLLECTION_MIN_ANSIBLE_VERSION = ">=2.9"
 DEPRECATION_CYCLE_IN_YEAR = 2
